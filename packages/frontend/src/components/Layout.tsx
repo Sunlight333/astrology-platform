@@ -13,75 +13,66 @@ export default function Layout() {
     navigate('/');
   };
 
-  return (
-    <div className="min-h-screen bg-cosmic-dark text-white relative overflow-hidden">
-      {/* Starfield background */}
-      <div
-        className="fixed inset-0 pointer-events-none"
-        style={{
-          backgroundImage: [
-            'radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.5), transparent)',
-            'radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.4), transparent)',
-            'radial-gradient(1.5px 1.5px at 50% 10%, rgba(255,215,0,0.4), transparent)',
-            'radial-gradient(1px 1px at 70% 80%, rgba(255,255,255,0.3), transparent)',
-            'radial-gradient(1px 1px at 90% 40%, rgba(255,255,255,0.5), transparent)',
-            'radial-gradient(1.5px 1.5px at 15% 90%, rgba(159,148,255,0.3), transparent)',
-            'radial-gradient(1px 1px at 60% 50%, rgba(255,255,255,0.4), transparent)',
-            'radial-gradient(1px 1px at 80% 15%, rgba(255,215,0,0.3), transparent)',
-            'radial-gradient(1px 1px at 40% 35%, rgba(255,255,255,0.3), transparent)',
-            'radial-gradient(1.5px 1.5px at 25% 70%, rgba(255,255,255,0.4), transparent)',
-          ].join(', '),
-          backgroundSize: '200px 200px',
-        }}
-      />
+  const navLinks = [
+    { to: '/', label: 'Quem somos' },
+    { to: '/new-chart', label: 'Mapa Astral' },
+    { to: '/dashboard', label: 'Mapa Anual' },
+    { to: '/pricing', label: 'Horoscopo Mensal' },
+  ];
 
-      {/* Nav */}
-      <nav className="relative z-10 border-b border-celestial-800/30 bg-cosmic-deeper/80 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Navbar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <Link to="/" className="font-display text-2xl text-celestial-300 hover:text-celestial-200 transition-colors">
-              Mapa Astral
+            <Link
+              to="/"
+              className="font-display font-medium text-primary tracking-wider text-sm"
+            >
+              ASTRO CONECTA
             </Link>
 
-            {/* Desktop links */}
-            <div className="hidden md:flex items-center gap-6">
-              <Link to="/" className="text-star-silver hover:text-white transition-colors text-sm">
-                Home
-              </Link>
-              <Link to="/dashboard" className="text-star-silver hover:text-white transition-colors text-sm">
-                Meu Painel
-              </Link>
-              <Link to="/pricing" className="text-star-silver hover:text-white transition-colors text-sm">
-                Precos
-              </Link>
+            {/* Desktop center nav */}
+            <div className="hidden md:flex items-center gap-8">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.to + link.label}
+                  to={link.to}
+                  className="text-sm text-muted-foreground font-body hover:text-foreground transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
 
+            {/* Desktop right */}
+            <div className="hidden md:flex items-center gap-4">
               {isAuthenticated ? (
-                <div className="flex items-center gap-4 ml-4">
-                  <span className="text-celestial-200 text-sm">{user?.name}</span>
+                <div className="flex items-center gap-4">
+                  <span className="text-sm text-muted-foreground">{user?.name}</span>
                   <button
                     onClick={handleLogout}
-                    className="text-star-silver hover:text-star-red transition-colors"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
                     title="Sair"
                   >
                     <LogOut size={18} />
                   </button>
                 </div>
               ) : (
-                <div className="flex items-center gap-3 ml-4">
-                  <Link to="/login" className="btn-secondary text-sm py-1.5 px-4">
-                    Login
-                  </Link>
-                  <Link to="/register" className="btn-primary text-sm py-1.5 px-4">
-                    Cadastro
-                  </Link>
-                </div>
+                <Link
+                  to="/new-chart"
+                  className="bg-primary text-white px-6 py-2 rounded-md text-sm font-body hover:bg-primary-dark transition-colors"
+                >
+                  Descubra seu mapa
+                </Link>
               )}
             </div>
 
-            {/* Mobile menu button */}
+            {/* Mobile hamburger */}
             <button
-              className="md:hidden text-star-silver"
+              className="md:hidden text-foreground"
               onClick={() => setMobileOpen(!mobileOpen)}
             >
               {mobileOpen ? <X size={24} /> : <Menu size={24} />}
@@ -91,47 +82,60 @@ export default function Layout() {
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <div className="md:hidden border-t border-celestial-800/30 bg-cosmic-deeper/95 backdrop-blur-md px-4 py-4 space-y-3">
-            <Link to="/" onClick={() => setMobileOpen(false)} className="block text-star-silver hover:text-white">
-              Home
-            </Link>
-            <Link to="/dashboard" onClick={() => setMobileOpen(false)} className="block text-star-silver hover:text-white">
-              Meu Painel
-            </Link>
-            <Link to="/pricing" onClick={() => setMobileOpen(false)} className="block text-star-silver hover:text-white">
-              Precos
-            </Link>
+          <div className="md:hidden border-t border-border/50 bg-background/95 backdrop-blur-md px-4 py-4 space-y-3">
+            {navLinks.map((link) => (
+              <Link
+                key={link.to + link.label}
+                to={link.to}
+                onClick={() => setMobileOpen(false)}
+                className="block text-sm text-muted-foreground font-body hover:text-foreground transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
             {isAuthenticated ? (
               <>
-                <span className="block text-celestial-200 text-sm">{user?.name}</span>
-                <button onClick={() => { handleLogout(); setMobileOpen(false); }} className="text-star-red text-sm">
+                <span className="block text-sm text-muted-foreground">{user?.name}</span>
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setMobileOpen(false);
+                  }}
+                  className="text-sm text-destructive"
+                >
                   Sair
                 </button>
               </>
             ) : (
-              <div className="flex gap-3 pt-2">
-                <Link to="/login" onClick={() => setMobileOpen(false)} className="btn-secondary text-sm py-1.5 px-4">
-                  Login
-                </Link>
-                <Link to="/register" onClick={() => setMobileOpen(false)} className="btn-primary text-sm py-1.5 px-4">
-                  Cadastro
-                </Link>
-              </div>
+              <Link
+                to="/new-chart"
+                onClick={() => setMobileOpen(false)}
+                className="inline-block bg-primary text-white px-6 py-2 rounded-md text-sm font-body mt-2"
+              >
+                Descubra seu mapa
+              </Link>
             )}
           </div>
         )}
       </nav>
 
+      {/* Spacer for fixed nav */}
+      <div className="h-20" />
+
       {/* Content */}
-      <main className="relative z-10">
+      <main>
         <Outlet />
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-celestial-800/30 bg-cosmic-deeper/60 py-8 mt-16">
-        <div className="max-w-7xl mx-auto px-4 text-center text-star-silver text-sm">
-          <p className="font-display text-celestial-400 mb-2">Mapa Astral</p>
-          <p>&copy; {new Date().getFullYear()} Mapa Astral. Todos os direitos reservados.</p>
+      <footer className="py-12 bg-section-alt border-t border-border/50">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <p className="font-display font-medium text-primary tracking-wider text-sm mb-2">
+            ASTRO CONECTA
+          </p>
+          <p className="text-sm text-muted-foreground">
+            &copy; {new Date().getFullYear()} Astro Conecta. Todos os direitos reservados.
+          </p>
         </div>
       </footer>
     </div>

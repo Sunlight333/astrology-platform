@@ -123,14 +123,6 @@ export function startBackgroundJobs(): void {
     }
   }, TRANSIT_CHECK_INTERVAL_MS);
 
-  // Prevent intervals from keeping the process alive if everything else shuts down
-  if (cleanupIntervalId && typeof cleanupIntervalId === 'object' && 'unref' in cleanupIntervalId) {
-    cleanupIntervalId.unref();
-  }
-  if (transitCheckIntervalId && typeof transitCheckIntervalId === 'object' && 'unref' in transitCheckIntervalId) {
-    transitCheckIntervalId.unref();
-  }
-
   console.info(
     '[jobs] Background jobs started: cleanup (every 1h), transit recalc (midnight UTC)',
   );

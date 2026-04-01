@@ -4,40 +4,55 @@ export default {
   theme: {
     extend: {
       colors: {
-        celestial: {
-          50: '#f0f0ff',
-          100: '#e0dfff',
-          200: '#c4bfff',
-          300: '#9f94ff',
-          400: '#7c5fff',
-          500: '#6a3bff',
-          600: '#5e16ff',
-          700: '#5110e0',
-          800: '#420fb7',
-          900: '#371095',
-          950: '#0d0326',
+        background: '#f7f4f2',
+        foreground: '#2c3952',
+        card: '#faf9f8',
+        border: '#e4e0db',
+        input: '#e4e0db',
+        ring: '#5b75a3',
+        primary: {
+          DEFAULT: '#5b75a3',
+          foreground: '#ffffff',
+          dark: '#3e5274',
+          light: '#9fadc5',
         },
-        cosmic: {
-          dark: '#070114',
-          deeper: '#0d0326',
-          deep: '#130538',
-          medium: '#1a074a',
-          light: '#2a0f6e',
+        secondary: {
+          DEFAULT: '#c9a5a8',
+          foreground: '#2c3952',
+          light: '#e6dadb',
         },
-        star: {
-          gold: '#ffd700',
-          silver: '#c0c0d0',
-          blue: '#4fc3f7',
-          red: '#ef5350',
-          green: '#66bb6a',
+        muted: {
+          DEFAULT: '#edeae7',
+          foreground: '#6c7992',
         },
+        gold: {
+          DEFAULT: '#d19747',
+          light: '#dfc49f',
+        },
+        rose: {
+          light: '#e6dadb',
+          DEFAULT: '#c9a5a8',
+        },
+        cream: {
+          DEFAULT: '#f7f4f2',
+          dark: '#e9e5e1',
+        },
+        destructive: '#ee4444',
       },
       fontFamily: {
-        display: ['Cinzel', 'serif'],
-        body: ['Inter', 'sans-serif'],
+        display: ['Heebo', 'sans-serif'],
+        body: ['Kollektif', 'Inter', 'sans-serif'],
+      },
+      borderRadius: {
+        '2xl': '1rem',
+      },
+      boxShadow: {
+        soft: '0 4px 24px -4px rgba(91, 117, 163, 0.1)',
+        glow: '0 0 40px rgba(209, 151, 71, 0.15)',
       },
       backgroundImage: {
-        'starfield': 'radial-gradient(2px 2px at 20px 30px, #eee, transparent), radial-gradient(2px 2px at 40px 70px, #fff, transparent), radial-gradient(1px 1px at 90px 40px, #ddd, transparent)',
+        'hero-gradient': 'linear-gradient(180deg, #f7f4f2 0%, #e6dadb 50%, #f7f4f2 100%)',
+        'section-alt': 'linear-gradient(180deg, #e9e5e1 0%, #f7f4f2 100%)',
       },
     },
   },

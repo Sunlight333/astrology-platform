@@ -20,9 +20,10 @@ const app = express();
 // Trust proxy so rate limiting works behind reverse proxies (e.g., nginx, AWS ALB)
 app.set('trust proxy', 1);
 
-// Security headers
+// Security headers – disable CSP in development (Vite proxies API requests and
+// browser extensions like Chrome DevTools trigger false CSP violations).
 app.use(helmet({
-  contentSecurityPolicy: {
+  contentSecurityPolicy: env.NODE_ENV === 'production' ? {
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'"],
@@ -35,18 +36,17 @@ app.use(helmet({
       baseUri: ["'self'"],
       formAction: ["'self'"],
     },
-  },
-  crossOriginEmbedderPolicy: true,
-  crossOriginOpenerPolicy: true,
-  crossOriginResourcePolicy: { policy: 'same-origin' },
-  hsts: {
-    maxAge: 31536000, // 1 year
+  } : false,
+  crossOriginEmbedderPolicy: env.NODE_ENV === 'production',
+  crossOriginOpenerPolicy: env.NODE_ENV === 'production',
+  crossOriginResourcePolicy: env.NODE_ENV === 'production' ? { policy: 'same-origin' as const } : false,
+  hsts: env.NODE_ENV === 'production' ? {
+    maxAge: 31536000,
     includeSubDomains: true,
     preload: true,
-  },
+  } : false,
   referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
   noSniff: true,
-  xssFilter: true,
 }));
 
 // CORS - restricted to frontend URL only (no wildcards)
@@ -87,6 +87,11 @@ app.use('/api/profiles', profileRoutes);
 app.use('/api/transits', transitRoutes);
 // app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
+
+// Catch-all 404 for unmatched routes (returns JSON, not Express's default HTML)
+app.use((_req, res) => {
+  res.status(404).json({ error: 'Not found' });
+});
 
 // Global error handler (must be last middleware)
 app.use(globalErrorHandler);

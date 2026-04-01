@@ -41,20 +41,20 @@ export default function PaymentSuccessPage() {
   }, [orderId]);
 
   return (
-    <div className="min-h-[70vh] flex items-center justify-center px-4">
+    <div className="min-h-[70vh] flex items-center justify-center px-4 bg-background">
       <motion.div
-        className="card p-10 text-center max-w-md"
+        className="bg-card rounded-2xl p-10 shadow-soft border border-border/50 text-center max-w-md"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
       >
         {status === 'polling' ? (
           <>
-            <div className="w-16 h-16 mx-auto mb-6 border-2 border-celestial-400 border-t-transparent rounded-full animate-spin" />
-            <h1 className="font-display text-2xl text-celestial-200 mb-3">
+            <div className="w-16 h-16 mx-auto mb-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            <h1 className="font-display font-light text-2xl text-foreground mb-3">
               Processando Pagamento...
             </h1>
-            <p className="text-star-silver text-sm">
+            <p className="text-muted-foreground text-sm">
               Aguarde enquanto confirmamos seu pagamento.
             </p>
           </>
@@ -65,13 +65,13 @@ export default function PaymentSuccessPage() {
               animate={{ scale: 1 }}
               transition={{ type: 'spring', stiffness: 200, damping: 12, delay: 0.2 }}
             >
-              <CheckCircle size={64} className="text-star-green mx-auto mb-6" />
+              <CheckCircle size={64} className="text-green-500 mx-auto mb-6" />
             </motion.div>
 
-            <h1 className="font-display text-2xl text-celestial-200 mb-3">
+            <h1 className="font-display font-light text-2xl text-foreground mb-3">
               Pagamento Confirmado!
             </h1>
-            <p className="text-star-silver text-sm mb-8">
+            <p className="text-muted-foreground text-sm mb-8">
               Seu pagamento foi processado com sucesso. Seu mapa astral completo ja esta disponivel.
             </p>
 
@@ -79,7 +79,7 @@ export default function PaymentSuccessPage() {
               <Link to="/dashboard" className="btn-primary py-3">
                 Ver Meu Mapa Astral
               </Link>
-              <Link to="/dashboard" className="text-celestial-300 hover:text-celestial-200 text-sm underline">
+              <Link to="/dashboard" className="text-primary hover:text-primary-dark text-sm underline">
                 Ir para o Painel
               </Link>
             </div>

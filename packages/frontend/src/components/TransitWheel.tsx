@@ -32,15 +32,15 @@ const ZODIAC_ORDER: ZodiacSign[] = [
 ];
 
 const ASPECT_COLORS: Record<string, string> = {
-  conjunction: '#ffd700',
-  trine: '#4fc3f7',
-  sextile: '#66bb6a',
-  square: '#ef5350',
-  opposition: '#ef5350',
-  quincunx: '#9f94ff',
-  semisextile: '#66bb6a',
-  semisquare: '#ef5350',
-  sesquiquadrate: '#ef5350',
+  conjunction: '#d19747',
+  trine: '#7b9cc4',
+  sextile: '#6aaa6e',
+  square: '#d47272',
+  opposition: '#d47272',
+  quincunx: '#9f94c8',
+  semisextile: '#6aaa6e',
+  semisquare: '#d47272',
+  sesquiquadrate: '#d47272',
 };
 
 // ── Geometry helpers ──
@@ -111,20 +111,20 @@ export default function TransitWheel({ chart, transitPositions, transitAspects }
     const endAngle = eclipticToAngle(endLng, asc);
     const midAngle = eclipticToAngle(startLng + 15, asc);
     const [gx, gy] = polarToXY(CX, CY, SIGN_R, midAngle);
-    const fill = i % 2 === 0 ? 'rgba(94,22,255,0.12)' : 'rgba(55,16,149,0.12)';
+    const fill = i % 2 === 0 ? 'rgba(230,218,219,0.35)' : 'rgba(201,165,168,0.15)';
 
     return (
       <g key={sign}>
         <path
           d={describeArc(CX, CY, SIGN_INNER_R, SIGN_OUTER_R, endAngle, startAngle)}
           fill={fill}
-          stroke="rgba(159,148,255,0.3)"
+          stroke="rgba(201,165,168,0.4)"
           strokeWidth="0.5"
         />
         <text
           x={gx} y={gy}
           textAnchor="middle" dominantBaseline="central"
-          fill="#9f94ff" fontSize="12" className="select-none"
+          fill="#c9a5a8" fontSize="12" className="select-none"
         >
           {ZODIAC_GLYPHS[sign]}
         </text>
@@ -141,7 +141,7 @@ export default function TransitWheel({ chart, transitPositions, transitAspects }
       <line
         key={`house-${cusp.house}`}
         x1={x1} y1={y1} x2={x2} y2={y2}
-        stroke="rgba(159,148,255,0.2)"
+        stroke="rgba(201,165,168,0.25)"
         strokeWidth="0.5"
       />
     );
@@ -178,7 +178,7 @@ export default function TransitWheel({ chart, transitPositions, transitAspects }
         <text
           x={px} y={py}
           textAnchor="middle" dominantBaseline="central"
-          fill="#a0a0c0" fontSize="12" fontWeight="bold"
+          fill="#6c7992" fontSize="12" fontWeight="bold"
           className="cursor-pointer select-none"
           onMouseEnter={() => setTooltip({ x: px, y: py - 16, text: tooltipText })}
           onMouseLeave={() => setTooltip(null)}
@@ -187,7 +187,7 @@ export default function TransitWheel({ chart, transitPositions, transitAspects }
           <title>{tooltipText}</title>
         </text>
         {p.isRetrograde && (
-          <text x={px + 7} y={py - 7} fill="#ef5350" fontSize="6" className="select-none">R</text>
+          <text x={px + 7} y={py - 7} fill="#d47272" fontSize="6" className="select-none">R</text>
         )}
       </g>
     );
@@ -219,11 +219,11 @@ export default function TransitWheel({ chart, transitPositions, transitAspects }
 
     return (
       <g key={`transit-${tp.planet}`}>
-        <circle cx={px} cy={py} r={8} fill="rgba(255,215,0,0.1)" stroke="rgba(255,215,0,0.3)" strokeWidth="0.5" />
+        <circle cx={px} cy={py} r={8} fill="rgba(209,151,71,0.1)" stroke="rgba(209,151,71,0.35)" strokeWidth="0.5" />
         <text
           x={px} y={py}
           textAnchor="middle" dominantBaseline="central"
-          fill="#ffd700" fontSize="12" fontWeight="bold"
+          fill="#5b75a3" fontSize="12" fontWeight="bold"
           className="cursor-pointer select-none"
           onMouseEnter={() => setTooltip({ x: px, y: py - 16, text: tooltipText })}
           onMouseLeave={() => setTooltip(null)}
@@ -232,7 +232,7 @@ export default function TransitWheel({ chart, transitPositions, transitAspects }
           <title>{tooltipText}</title>
         </text>
         {tp.isRetrograde && (
-          <text x={px + 7} y={py - 7} fill="#ef5350" fontSize="6" className="select-none">R</text>
+          <text x={px + 7} y={py - 7} fill="#d47272" fontSize="6" className="select-none">R</text>
         )}
       </g>
     );
@@ -246,7 +246,7 @@ export default function TransitWheel({ chart, transitPositions, transitAspects }
 
     const [x1, y1] = polarToXY(CX, CY, ASPECT_INNER_R, transitP.chartAngle);
     const [x2, y2] = polarToXY(CX, CY, ASPECT_INNER_R, natalP.chartAngle);
-    const color = ASPECT_COLORS[asp.aspectType] || '#666';
+    const color = ASPECT_COLORS[asp.aspectType] || '#999';
     const opacity = Math.max(0.2, 1 - asp.currentOrb / 10);
 
     return (
@@ -279,10 +279,10 @@ export default function TransitWheel({ chart, transitPositions, transitAspects }
     <div className="relative w-full max-w-lg mx-auto">
       <svg viewBox="0 0 500 500" className="w-full h-auto">
         {/* Background */}
-        <circle cx={CX} cy={CY} r={OUTER_R} fill="rgba(7,1,20,0.85)" stroke="rgba(159,148,255,0.3)" strokeWidth="1" />
-        <circle cx={CX} cy={CY} r={SIGN_INNER_R} fill="none" stroke="rgba(159,148,255,0.25)" strokeWidth="0.5" />
-        <circle cx={CX} cy={CY} r={NATAL_OUTER_R} fill="none" stroke="rgba(159,148,255,0.2)" strokeWidth="0.5" />
-        <circle cx={CX} cy={CY} r={NATAL_INNER_R} fill="none" stroke="rgba(159,148,255,0.2)" strokeWidth="0.5" />
+        <circle cx={CX} cy={CY} r={OUTER_R} fill="#faf9f8" stroke="rgba(201,165,168,0.4)" strokeWidth="1" />
+        <circle cx={CX} cy={CY} r={SIGN_INNER_R} fill="none" stroke="rgba(201,165,168,0.3)" strokeWidth="0.5" />
+        <circle cx={CX} cy={CY} r={NATAL_OUTER_R} fill="none" stroke="rgba(201,165,168,0.25)" strokeWidth="0.5" />
+        <circle cx={CX} cy={CY} r={NATAL_INNER_R} fill="none" stroke="rgba(201,165,168,0.25)" strokeWidth="0.5" />
 
         {/* Zodiac */}
         {signSegments}
@@ -300,22 +300,22 @@ export default function TransitWheel({ chart, transitPositions, transitAspects }
         {transitPlanetElements}
 
         {/* Ascendant */}
-        <line x1={ascX1} y1={ascY1} x2={ascX2} y2={ascY2} stroke="#ffd700" strokeWidth="1.5" />
-        <text x={ascLabelX} y={ascLabelY} textAnchor="middle" dominantBaseline="central" fill="#ffd700" fontSize="10" fontWeight="bold">AC</text>
+        <line x1={ascX1} y1={ascY1} x2={ascX2} y2={ascY2} stroke="#d19747" strokeWidth="1.5" />
+        <text x={ascLabelX} y={ascLabelY} textAnchor="middle" dominantBaseline="central" fill="#d19747" fontSize="10" fontWeight="bold">AC</text>
 
         {/* MC */}
-        <line x1={mcX1} y1={mcY1} x2={mcX2} y2={mcY2} stroke="#ffd700" strokeWidth="1" />
-        <text x={mcLabelX} y={mcLabelY} textAnchor="middle" dominantBaseline="central" fill="#ffd700" fontSize="10" fontWeight="bold">MC</text>
+        <line x1={mcX1} y1={mcY1} x2={mcX2} y2={mcY2} stroke="#d19747" strokeWidth="1" />
+        <text x={mcLabelX} y={mcLabelY} textAnchor="middle" dominantBaseline="central" fill="#d19747" fontSize="10" fontWeight="bold">MC</text>
 
         {/* Legend */}
-        <text x={10} y={488} fill="#a0a0c0" fontSize="8" className="select-none">Interno: Natal</text>
-        <text x={10} y={498} fill="#ffd700" fontSize="8" className="select-none">Externo: Transitos</text>
+        <text x={10} y={488} fill="#6c7992" fontSize="8" className="select-none">Interno: Natal</text>
+        <text x={10} y={498} fill="#5b75a3" fontSize="8" className="select-none">Externo: Transitos</text>
       </svg>
 
       {/* Tooltip */}
       {tooltip && (
         <div
-          className="absolute pointer-events-none bg-cosmic-deep border border-celestial-700 rounded px-3 py-1.5 text-xs text-celestial-200 shadow-lg whitespace-nowrap z-20"
+          className="absolute pointer-events-none bg-card border border-border rounded px-3 py-1.5 text-xs text-foreground shadow-soft whitespace-nowrap z-20"
           style={{
             left: `${(tooltip.x / 500) * 100}%`,
             top: `${(tooltip.y / 500) * 100}%`,

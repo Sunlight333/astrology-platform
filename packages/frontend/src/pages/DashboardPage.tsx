@@ -7,9 +7,9 @@ import * as api from '../services/api';
 import type { BirthProfile } from '@star/shared';
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  pending: { label: 'Pendente', color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' },
-  paid: { label: 'Pago', color: 'bg-green-500/20 text-green-400 border-green-500/30' },
-  refunded: { label: 'Reembolsado', color: 'bg-gray-500/20 text-gray-400 border-gray-500/30' },
+  pending: { label: 'Pendente', color: 'bg-gold/10 text-gold border-gold/30' },
+  paid: { label: 'Pago', color: 'bg-green-100 text-green-700 border-green-200' },
+  refunded: { label: 'Reembolsado', color: 'bg-muted text-muted-foreground border-border' },
 };
 
 export default function DashboardPage() {
@@ -61,8 +61,8 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="w-10 h-10 border-2 border-celestial-400 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-[60vh] flex items-center justify-center bg-background">
+        <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -74,16 +74,19 @@ export default function DashboardPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="font-display text-3xl text-celestial-200 mb-2">
+        <p className="text-xs uppercase tracking-[0.2em] text-secondary font-body mb-2">
+          SEU PAINEL
+        </p>
+        <h1 className="font-display font-light text-3xl text-foreground mb-2">
           Ola, {user?.name}
         </h1>
-        <p className="text-star-silver mb-10">Gerencie seus mapas astrais e pedidos.</p>
+        <p className="text-muted-foreground mb-10 font-body">Gerencie seus mapas astrais e pedidos.</p>
       </motion.div>
 
       {/* Profiles / Charts */}
       <section className="mb-12">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="font-display text-xl text-celestial-300">Meus Mapas Astrais</h2>
+          <h2 className="font-display font-light text-xl text-foreground">Meus Mapas Astrais</h2>
           <Link
             to="/new-chart"
             className="btn-primary text-sm py-2 px-4 flex items-center gap-2"
@@ -93,8 +96,8 @@ export default function DashboardPage() {
         </div>
 
         {profiles.length === 0 ? (
-          <div className="card p-10 text-center">
-            <p className="text-star-silver mb-4">Voce ainda nao tem nenhum perfil de nascimento.</p>
+          <div className="bg-card rounded-2xl p-10 shadow-soft border border-border/50 text-center">
+            <p className="text-muted-foreground mb-4 font-body">Voce ainda nao tem nenhum perfil de nascimento.</p>
             <Link to="/new-chart" className="btn-primary py-2 px-6">
               Criar Primeiro Mapa
             </Link>
@@ -104,16 +107,23 @@ export default function DashboardPage() {
             {profiles.map((p, i) => (
               <motion.div
                 key={p.id}
-                className="card p-5 hover:border-celestial-600/40 transition-colors"
+                className="bg-card rounded-2xl p-5 shadow-soft border border-border/50 hover:border-primary/30 transition-colors"
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.08, duration: 0.4 }}
               >
-                <h3 className="font-display text-lg text-celestial-200 mb-1">{p.name}</h3>
-                <p className="text-star-silver text-sm mb-1">
-                  {new Date(p.birthDate).toLocaleDateString('pt-BR')} - {p.birthTime}
-                </p>
-                <p className="text-star-silver/60 text-xs mb-4">{p.birthCity}</p>
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-rose-light flex items-center justify-center flex-shrink-0">
+                    <Map size={18} className="text-secondary" />
+                  </div>
+                  <div>
+                    <h3 className="font-display font-light text-lg text-foreground">{p.name}</h3>
+                    <p className="text-muted-foreground text-sm font-body">
+                      {new Date(p.birthDate).toLocaleDateString('pt-BR')} - {p.birthTime}
+                    </p>
+                    <p className="text-muted-foreground/60 text-xs font-body">{p.birthCity}</p>
+                  </div>
+                </div>
 
                 <div className="flex items-center gap-2 flex-wrap">
                   {chartMap[p.id] ? (
@@ -146,28 +156,28 @@ export default function DashboardPage() {
 
       {/* Orders */}
       <section>
-        <h2 className="font-display text-xl text-celestial-300 mb-6">Historico de Pedidos</h2>
+        <h2 className="font-display font-light text-xl text-foreground mb-6">Historico de Pedidos</h2>
 
         {orders.length === 0 ? (
-          <div className="card p-8 text-center">
-            <p className="text-star-silver">Nenhum pedido encontrado.</p>
+          <div className="bg-card rounded-2xl p-8 shadow-soft border border-border/50 text-center">
+            <p className="text-muted-foreground font-body">Nenhum pedido encontrado.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {orders.map((order) => {
               const status = STATUS_LABELS[order.status] || STATUS_LABELS.pending;
               return (
-                <div key={order.id} className="card p-4 flex items-center justify-between">
+                <div key={order.id} className="bg-card rounded-2xl p-4 shadow-soft border border-border/50 flex items-center justify-between">
                   <div>
-                    <p className="text-celestial-200 text-sm font-medium">
+                    <p className="text-foreground text-sm font-medium font-body">
                       {order.productType === 'natal_chart' ? 'Mapa Astral Completo' : 'Relatorio de Transitos'}
                     </p>
-                    <p className="text-star-silver/60 text-xs">
+                    <p className="text-muted-foreground/60 text-xs font-body">
                       {new Date(order.createdAt).toLocaleDateString('pt-BR')}
                     </p>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span className="text-celestial-200 text-sm font-medium">
+                    <span className="text-foreground text-sm font-medium font-body">
                       R${(order.amount / 100).toFixed(2).replace('.', ',')}
                     </span>
                     <span className={`text-xs px-2.5 py-1 rounded-full border ${status.color}`}>

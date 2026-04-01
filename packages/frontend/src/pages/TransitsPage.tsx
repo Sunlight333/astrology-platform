@@ -45,18 +45,18 @@ const ASPECT_NAMES_PT: Record<string, string> = {
 };
 
 const ASPECT_COLORS: Record<string, { border: string; bg: string; text: string }> = {
-  conjunction: { border: 'border-yellow-500/50', bg: 'bg-yellow-500/10', text: 'text-yellow-400' },
-  trine: { border: 'border-sky-400/50', bg: 'bg-sky-400/10', text: 'text-sky-400' },
-  sextile: { border: 'border-green-400/50', bg: 'bg-green-400/10', text: 'text-green-400' },
-  square: { border: 'border-red-400/50', bg: 'bg-red-400/10', text: 'text-red-400' },
-  opposition: { border: 'border-red-500/50', bg: 'bg-red-500/10', text: 'text-red-500' },
-  quincunx: { border: 'border-purple-400/50', bg: 'bg-purple-400/10', text: 'text-purple-400' },
-  semisextile: { border: 'border-green-300/50', bg: 'bg-green-300/10', text: 'text-green-300' },
-  semisquare: { border: 'border-red-300/50', bg: 'bg-red-300/10', text: 'text-red-300' },
-  sesquiquadrate: { border: 'border-red-300/50', bg: 'bg-red-300/10', text: 'text-red-300' },
+  conjunction: { border: 'border-gold/50', bg: 'bg-gold/10', text: 'text-gold' },
+  trine: { border: 'border-primary/50', bg: 'bg-primary/10', text: 'text-primary' },
+  sextile: { border: 'border-green-500/50', bg: 'bg-green-500/10', text: 'text-green-600' },
+  square: { border: 'border-red-400/50', bg: 'bg-red-400/10', text: 'text-red-500' },
+  opposition: { border: 'border-red-500/50', bg: 'bg-red-500/10', text: 'text-red-600' },
+  quincunx: { border: 'border-purple-400/50', bg: 'bg-purple-400/10', text: 'text-purple-500' },
+  semisextile: { border: 'border-green-400/50', bg: 'bg-green-400/10', text: 'text-green-500' },
+  semisquare: { border: 'border-red-300/50', bg: 'bg-red-300/10', text: 'text-red-400' },
+  sesquiquadrate: { border: 'border-red-300/50', bg: 'bg-red-300/10', text: 'text-red-400' },
 };
 
-const DEFAULT_COLORS = { border: 'border-celestial-700/50', bg: 'bg-celestial-700/10', text: 'text-celestial-300' };
+const DEFAULT_COLORS = { border: 'border-border/50', bg: 'bg-muted/30', text: 'text-muted-foreground' };
 
 const FREE_TRANSIT_LIMIT = 3;
 
@@ -81,9 +81,9 @@ function orbOpacity(orb: number): number {
 }
 
 function orbGlow(orb: number): string {
-  if (orb < 0.5) return 'shadow-lg shadow-yellow-500/30';
-  if (orb < 1) return 'shadow-md shadow-celestial-500/20';
-  if (orb < 3) return 'shadow-sm shadow-celestial-600/10';
+  if (orb < 0.5) return 'shadow-lg shadow-gold/20';
+  if (orb < 1) return 'shadow-md shadow-primary/15';
+  if (orb < 3) return 'shadow-sm shadow-primary/10';
   return '';
 }
 
@@ -125,8 +125,8 @@ export default function TransitsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="w-10 h-10 border-2 border-celestial-400 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-[60vh] flex items-center justify-center bg-background">
+        <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -134,8 +134,8 @@ export default function TransitsPage() {
   if (error) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-10">
-        <div className="card p-8 text-center">
-          <p className="text-red-400 mb-4">{error}</p>
+        <div className="bg-card rounded-2xl p-8 shadow-soft border border-border/50 text-center">
+          <p className="text-red-500 mb-4 font-body">{error}</p>
           <Link to="/dashboard" className="btn-secondary text-sm py-2 px-4">
             Voltar ao Painel
           </Link>
@@ -157,15 +157,15 @@ export default function TransitsPage() {
         className="mb-8"
       >
         <div className="flex items-center gap-3 mb-4">
-          <Link to="/dashboard" className="text-star-silver hover:text-white transition-colors">
+          <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft size={20} />
           </Link>
-          <h1 className="font-display text-3xl text-celestial-200">
+          <h1 className="font-display font-light text-3xl text-foreground">
             Transitos Ativos
           </h1>
         </div>
         <div className="flex items-center gap-4 flex-wrap">
-          <p className="text-star-silver">
+          <p className="text-muted-foreground font-body">
             {transits.length} transito{transits.length !== 1 ? 's' : ''} ativo{transits.length !== 1 ? 's' : ''}
           </p>
           <Link
@@ -207,7 +207,7 @@ export default function TransitsPage() {
                 return (
                   <motion.div
                     key={`${t.transitPlanet}-${t.aspectType}-${t.natalPlanet}`}
-                    className={`card p-4 border ${colors.border} ${glow} transition-all`}
+                    className={`bg-card rounded-2xl p-4 shadow-soft border ${colors.border} ${glow} transition-all`}
                     style={{ opacity }}
                     initial={{ opacity: 0, x: 30 }}
                     animate={{ opacity, x: 0 }}
@@ -217,35 +217,39 @@ export default function TransitsPage() {
                     <div className="flex items-center justify-between flex-wrap gap-3">
                       {/* Planet glyphs + aspect */}
                       <div className="flex items-center gap-3">
-                        <span className="text-2xl text-celestial-200" title={PLANET_NAMES_PT[t.transitPlanet]}>
-                          {PLANET_GLYPHS[t.transitPlanet]}
-                        </span>
+                        <div className="w-10 h-10 rounded-full bg-rose-light flex items-center justify-center">
+                          <span className="text-xl text-primary" title={PLANET_NAMES_PT[t.transitPlanet]}>
+                            {PLANET_GLYPHS[t.transitPlanet]}
+                          </span>
+                        </div>
                         <span className={`text-lg ${colors.text}`} title={ASPECT_NAMES_PT[t.aspectType]}>
                           {ASPECT_SYMBOLS[t.aspectType] || t.aspectType}
                         </span>
-                        <span className="text-2xl text-star-silver" title={PLANET_NAMES_PT[t.natalPlanet]}>
-                          {PLANET_GLYPHS[t.natalPlanet]}
-                        </span>
+                        <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                          <span className="text-xl text-muted-foreground" title={PLANET_NAMES_PT[t.natalPlanet]}>
+                            {PLANET_GLYPHS[t.natalPlanet]}
+                          </span>
+                        </div>
                         <div className="ml-2">
-                          <p className="text-sm text-celestial-200 font-medium">
+                          <p className="text-sm text-foreground font-medium font-body">
                             {PLANET_NAMES_PT[t.transitPlanet]} {ASPECT_NAMES_PT[t.aspectType]} {PLANET_NAMES_PT[t.natalPlanet]}
                           </p>
                           {isExact && (
-                            <span className="text-xs text-yellow-400 font-semibold">EXATO</span>
+                            <span className="text-xs text-gold font-semibold">EXATO</span>
                           )}
                         </div>
                       </div>
 
                       {/* Orb + status */}
                       <div className="text-right">
-                        <p className="text-sm text-celestial-300">
+                        <p className="text-sm text-primary font-body">
                           Orbe: {t.currentOrb.toFixed(2)}\u00b0
                         </p>
-                        <p className={`text-xs ${t.isApplying ? 'text-sky-400' : 'text-orange-400'}`}>
+                        <p className={`text-xs ${t.isApplying ? 'text-primary' : 'text-secondary'}`}>
                           {t.isApplying ? 'Aplicando' : 'Separando'}
                         </p>
                         {t.exactDate && (
-                          <p className="text-xs text-star-silver mt-0.5">
+                          <p className="text-xs text-muted-foreground mt-0.5 font-body">
                             Exato: {new Date(t.exactDate).toLocaleDateString('pt-BR')}
                           </p>
                         )}
@@ -266,19 +270,19 @@ export default function TransitsPage() {
                     return (
                       <div
                         key={`locked-${i}`}
-                        className={`card p-4 border ${colors.border}`}
+                        className={`bg-card rounded-2xl p-4 shadow-soft border ${colors.border}`}
                       >
                         <div className="flex items-center gap-3">
-                          <span className="text-2xl text-celestial-200">
+                          <span className="text-2xl text-primary">
                             {PLANET_GLYPHS[t.transitPlanet]}
                           </span>
                           <span className={`text-lg ${colors.text}`}>
                             {ASPECT_SYMBOLS[t.aspectType]}
                           </span>
-                          <span className="text-2xl text-star-silver">
+                          <span className="text-2xl text-muted-foreground">
                             {PLANET_GLYPHS[t.natalPlanet]}
                           </span>
-                          <p className="text-sm text-celestial-200 ml-2">
+                          <p className="text-sm text-foreground ml-2 font-body">
                             {PLANET_NAMES_PT[t.transitPlanet]} {ASPECT_NAMES_PT[t.aspectType]} {PLANET_NAMES_PT[t.natalPlanet]}
                           </p>
                         </div>
@@ -288,18 +292,20 @@ export default function TransitsPage() {
                 </div>
 
                 {/* CTA overlay */}
-                <div className="absolute inset-0 flex items-center justify-center bg-cosmic-dark/60 backdrop-blur-sm rounded-lg">
+                <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-sm rounded-lg">
                   <div className="text-center">
-                    <Lock size={32} className="mx-auto text-celestial-400 mb-3" />
-                    <p className="text-celestial-200 font-display text-lg mb-2">
+                    <div className="w-14 h-14 mx-auto rounded-full bg-rose-light flex items-center justify-center mb-3">
+                      <Lock size={24} className="text-gold" />
+                    </div>
+                    <p className="text-foreground font-display font-light text-lg mb-2">
                       +{lockedTransits.length} transito{lockedTransits.length !== 1 ? 's' : ''} disponive{lockedTransits.length !== 1 ? 'is' : 'l'}
                     </p>
-                    <p className="text-star-silver text-sm mb-4">
+                    <p className="text-muted-foreground text-sm mb-4 font-body">
                       Desbloqueie todos os transitos com o relatorio completo
                     </p>
                     <Link
                       to="/pricing"
-                      className="btn-primary text-sm py-2 px-6 inline-flex items-center gap-2"
+                      className="btn-gold text-sm py-2 px-6 inline-flex items-center gap-2"
                     >
                       Ver Planos
                     </Link>
@@ -309,8 +315,8 @@ export default function TransitsPage() {
             )}
 
             {transits.length === 0 && (
-              <div className="card p-8 text-center">
-                <p className="text-star-silver">Nenhum transito ativo no momento.</p>
+              <div className="bg-card rounded-2xl p-8 shadow-soft border border-border/50 text-center">
+                <p className="text-muted-foreground font-body">Nenhum transito ativo no momento.</p>
               </div>
             )}
           </div>

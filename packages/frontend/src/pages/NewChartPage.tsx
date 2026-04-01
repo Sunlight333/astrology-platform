@@ -47,32 +47,32 @@ export default function NewChartPage() {
   };
 
   const fieldClass =
-    'w-full bg-cosmic-deep border border-celestial-800/40 rounded-lg px-4 py-2.5 text-white placeholder-star-silver/40 focus:outline-none focus:border-celestial-500 transition-colors';
+    'w-full px-4 py-3 rounded-lg border border-input bg-background text-foreground placeholder-muted-foreground/50 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none font-body text-sm transition-colors';
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-10">
+    <div className="min-h-[80vh] flex items-center justify-center px-4 py-10 bg-background">
       <motion.div
-        className="card p-8 w-full max-w-lg"
+        className="bg-card rounded-2xl p-8 shadow-soft border border-border/50 w-full max-w-lg"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="font-display text-3xl text-celestial-200 text-center mb-2">
+        <h1 className="font-display font-light text-3xl text-foreground text-center mb-2">
           Novo Mapa Astral
         </h1>
-        <p className="text-star-silver text-center text-sm mb-8">
+        <p className="text-muted-foreground text-center text-sm mb-8 font-body">
           Informe os dados de nascimento para calcular o mapa.
         </p>
 
         {error && (
-          <div className="bg-star-red/10 border border-star-red/30 text-star-red text-sm rounded-lg p-3 mb-6">
+          <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg p-3 mb-6">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label htmlFor="name" className="block text-star-silver text-sm mb-1.5">
+            <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1.5">
               Nome do Perfil
             </label>
             <input
@@ -88,7 +88,7 @@ export default function NewChartPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="birthDate" className="block text-star-silver text-sm mb-1.5">
+              <label htmlFor="birthDate" className="block text-sm font-medium text-foreground mb-1.5">
                 Data de Nascimento
               </label>
               <input
@@ -102,7 +102,7 @@ export default function NewChartPage() {
             </div>
 
             <div>
-              <label htmlFor="birthTime" className="block text-star-silver text-sm mb-1.5">
+              <label htmlFor="birthTime" className="block text-sm font-medium text-foreground mb-1.5">
                 Horario de Nascimento
               </label>
               <input
@@ -116,12 +116,12 @@ export default function NewChartPage() {
             </div>
           </div>
 
-          <p className="text-celestial-400/60 text-xs -mt-2">
+          <p className="text-muted-foreground/70 text-xs -mt-2">
             O horario exato e importante para calcular as casas astrologicas com precisao.
           </p>
 
           <div>
-            <label htmlFor="birthCity" className="block text-star-silver text-sm mb-1.5">
+            <label htmlFor="birthCity" className="block text-sm font-medium text-foreground mb-1.5">
               Cidade de Nascimento
             </label>
             <input

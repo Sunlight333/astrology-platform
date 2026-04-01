@@ -21,7 +21,7 @@
   "dependencies": {
     "@prisma/client": "^6.0.0",
     "@star/shared": "*",
-    "bcrypt": "^5.1.0",
+    "bcryptjs": "^3.0.3",
     "bullmq": "^5.0.0",
     "cookie-parser": "^1.4.0",
     "cors": "^2.8.0",
@@ -39,6 +39,7 @@
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
+    "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.0",
     "@types/cors": "^2.8.0",
     "@types/express": "^5.0.0",

@@ -58,60 +58,60 @@ export default function RegisterPage() {
   };
 
   const fieldClass =
-    'w-full bg-cosmic-deep border border-celestial-800/40 rounded-lg px-4 py-2.5 text-white placeholder-star-silver/40 focus:outline-none focus:border-celestial-500 transition-colors';
+    'w-full px-4 py-3 rounded-lg border border-input bg-background text-foreground placeholder-muted-foreground/50 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none font-body text-sm transition-colors';
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4">
-      <div className="card p-8 w-full max-w-md">
-        <h1 className="font-display text-3xl text-celestial-200 text-center mb-8">
+    <div className="min-h-[80vh] flex items-center justify-center px-4 bg-background">
+      <div className="bg-card rounded-2xl p-8 shadow-soft border border-border/50 w-full max-w-md">
+        <h1 className="font-display font-light text-3xl text-foreground text-center mb-8">
           Criar Conta
         </h1>
 
         {apiError && (
-          <div className="bg-star-red/10 border border-star-red/30 text-star-red text-sm rounded-lg p-3 mb-6">
+          <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg p-3 mb-6">
             {apiError}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label htmlFor="name" className="block text-star-silver text-sm mb-1.5">Nome</label>
+            <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1.5">Nome</label>
             <input
               id="name" type="text" required
               value={name} onChange={(e) => setName(e.target.value)}
               className={fieldClass} placeholder="Seu nome"
             />
-            {errors.name && <p className="text-star-red text-xs mt-1">{errors.name}</p>}
+            {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-star-silver text-sm mb-1.5">Email</label>
+            <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1.5">Email</label>
             <input
               id="email" type="email" required
               value={email} onChange={(e) => setEmail(e.target.value)}
               className={fieldClass} placeholder="seu@email.com"
             />
-            {errors.email && <p className="text-star-red text-xs mt-1">{errors.email}</p>}
+            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-star-silver text-sm mb-1.5">Senha</label>
+            <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1.5">Senha</label>
             <input
               id="password" type="password" required
               value={password} onChange={(e) => setPassword(e.target.value)}
               className={fieldClass} placeholder="Minimo 6 caracteres"
             />
-            {errors.password && <p className="text-star-red text-xs mt-1">{errors.password}</p>}
+            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-star-silver text-sm mb-1.5">Confirmar Senha</label>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground mb-1.5">Confirmar Senha</label>
             <input
               id="confirmPassword" type="password" required
               value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
               className={fieldClass} placeholder="Repita a senha"
             />
-            {errors.confirmPassword && <p className="text-star-red text-xs mt-1">{errors.confirmPassword}</p>}
+            {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
           </div>
 
           <button
@@ -122,9 +122,9 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <p className="text-star-silver text-sm text-center mt-6">
+        <p className="text-muted-foreground text-sm text-center mt-6">
           Ja tem conta?{' '}
-          <Link to="/login" className="text-celestial-300 hover:text-celestial-200 underline">
+          <Link to="/login" className="text-primary hover:text-primary-dark underline">
             Entrar
           </Link>
         </p>

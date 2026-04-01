@@ -32,15 +32,15 @@ const ZODIAC_ORDER: ZodiacSign[] = [
 ];
 
 const ASPECT_COLORS: Record<string, string> = {
-  conjunction: '#ffd700',
-  trine: '#4fc3f7',
-  sextile: '#66bb6a',
-  square: '#ef5350',
-  opposition: '#ef5350',
-  quincunx: '#9f94ff',
-  semisextile: '#66bb6a',
-  semisquare: '#ef5350',
-  sesquiquadrate: '#ef5350',
+  conjunction: '#d19747',
+  trine: '#7b9cc4',
+  sextile: '#6aaa6e',
+  square: '#d47272',
+  opposition: '#d47272',
+  quincunx: '#9f94c8',
+  semisextile: '#6aaa6e',
+  semisquare: '#d47272',
+  sesquiquadrate: '#d47272',
 };
 
 // ── Geometry helpers ──
@@ -123,14 +123,14 @@ export default function ZodiacWheel({ chart }: ZodiacWheelProps) {
     const endAngle = eclipticToAngle(endLng, asc);
     const midAngle = eclipticToAngle(startLng + 15, asc);
     const [gx, gy] = polarToXY(CX, CY, SIGN_R, midAngle);
-    const fill = i % 2 === 0 ? 'rgba(94,22,255,0.12)' : 'rgba(55,16,149,0.12)';
+    const fill = i % 2 === 0 ? 'rgba(230,218,219,0.35)' : 'rgba(201,165,168,0.15)';
 
     return (
       <g key={sign}>
         <path
           d={describeArc(CX, CY, HOUSE_OUTER_R, OUTER_R, endAngle, startAngle)}
           fill={fill}
-          stroke="rgba(159,148,255,0.3)"
+          stroke="rgba(201,165,168,0.4)"
           strokeWidth="0.5"
         />
         <text
@@ -138,7 +138,7 @@ export default function ZodiacWheel({ chart }: ZodiacWheelProps) {
           y={gy}
           textAnchor="middle"
           dominantBaseline="central"
-          fill="#9f94ff"
+          fill="#c9a5a8"
           fontSize="14"
           className="select-none"
         >
@@ -168,14 +168,14 @@ export default function ZodiacWheel({ chart }: ZodiacWheelProps) {
       <g key={`house-${cusp.house}`}>
         <line
           x1={lx1} y1={ly1} x2={lx2} y2={ly2}
-          stroke="rgba(159,148,255,0.25)"
+          stroke="rgba(201,165,168,0.3)"
           strokeWidth="0.5"
         />
         <text
           x={tx} y={ty}
           textAnchor="middle"
           dominantBaseline="central"
-          fill="rgba(192,192,208,0.5)"
+          fill="rgba(108,121,146,0.6)"
           fontSize="10"
           className="select-none"
         >
@@ -221,7 +221,7 @@ export default function ZodiacWheel({ chart }: ZodiacWheelProps) {
         {/* Tick line from zodiac to planet */}
         <line
           x1={tx} y1={ty} x2={px} y2={py}
-          stroke="rgba(159,148,255,0.15)"
+          stroke="rgba(201,165,168,0.2)"
           strokeWidth="0.5"
         />
         {/* Planet glyph */}
@@ -229,7 +229,7 @@ export default function ZodiacWheel({ chart }: ZodiacWheelProps) {
           x={px} y={py}
           textAnchor="middle"
           dominantBaseline="central"
-          fill="#ffd700"
+          fill="#5b75a3"
           fontSize="14"
           fontWeight="bold"
           className="cursor-pointer select-none"
@@ -242,7 +242,7 @@ export default function ZodiacWheel({ chart }: ZodiacWheelProps) {
         {p.isRetrograde && (
           <text
             x={px + 8} y={py - 8}
-            fill="#ef5350"
+            fill="#d47272"
             fontSize="7"
             className="select-none"
           >
@@ -261,7 +261,7 @@ export default function ZodiacWheel({ chart }: ZodiacWheelProps) {
 
     const [x1, y1] = polarToXY(CX, CY, ASPECT_R, pA.chartAngle);
     const [x2, y2] = polarToXY(CX, CY, ASPECT_R, pB.chartAngle);
-    const color = ASPECT_COLORS[asp.aspectType] || '#666';
+    const color = ASPECT_COLORS[asp.aspectType] || '#999';
 
     return (
       <line
@@ -294,9 +294,9 @@ export default function ZodiacWheel({ chart }: ZodiacWheelProps) {
     <div className="relative w-full max-w-lg mx-auto">
       <svg viewBox="0 0 500 500" className="w-full h-auto">
         {/* Background circle */}
-        <circle cx={CX} cy={CY} r={OUTER_R} fill="rgba(7,1,20,0.8)" stroke="rgba(159,148,255,0.3)" strokeWidth="1" />
-        <circle cx={CX} cy={CY} r={HOUSE_OUTER_R} fill="none" stroke="rgba(159,148,255,0.2)" strokeWidth="0.5" />
-        <circle cx={CX} cy={CY} r={HOUSE_INNER_R} fill="none" stroke="rgba(159,148,255,0.2)" strokeWidth="0.5" />
+        <circle cx={CX} cy={CY} r={OUTER_R} fill="#faf9f8" stroke="rgba(201,165,168,0.4)" strokeWidth="1" />
+        <circle cx={CX} cy={CY} r={HOUSE_OUTER_R} fill="none" stroke="rgba(201,165,168,0.3)" strokeWidth="0.5" />
+        <circle cx={CX} cy={CY} r={HOUSE_INNER_R} fill="none" stroke="rgba(201,165,168,0.3)" strokeWidth="0.5" />
 
         {/* Zodiac signs */}
         {signSegments}
@@ -311,21 +311,21 @@ export default function ZodiacWheel({ chart }: ZodiacWheelProps) {
         {planetElements}
 
         {/* Ascendant line */}
-        <line x1={ascX1} y1={ascY1} x2={ascX2} y2={ascY2} stroke="#ffd700" strokeWidth="2" />
+        <line x1={ascX1} y1={ascY1} x2={ascX2} y2={ascY2} stroke="#d19747" strokeWidth="2" />
         <text
           x={ascLabelX} y={ascLabelY}
           textAnchor="middle" dominantBaseline="central"
-          fill="#ffd700" fontSize="11" fontWeight="bold"
+          fill="#d19747" fontSize="11" fontWeight="bold"
         >
           AC
         </text>
 
         {/* MC line */}
-        <line x1={mcX1} y1={mcY1} x2={mcX2} y2={mcY2} stroke="#ffd700" strokeWidth="1.5" />
+        <line x1={mcX1} y1={mcY1} x2={mcX2} y2={mcY2} stroke="#d19747" strokeWidth="1.5" />
         <text
           x={mcLabelX} y={mcLabelY}
           textAnchor="middle" dominantBaseline="central"
-          fill="#ffd700" fontSize="11" fontWeight="bold"
+          fill="#d19747" fontSize="11" fontWeight="bold"
         >
           MC
         </text>
@@ -334,7 +334,7 @@ export default function ZodiacWheel({ chart }: ZodiacWheelProps) {
       {/* Hover tooltip */}
       {tooltip && (
         <div
-          className="absolute pointer-events-none bg-cosmic-deep border border-celestial-700 rounded px-3 py-1.5 text-xs text-celestial-200 shadow-lg whitespace-nowrap"
+          className="absolute pointer-events-none bg-card border border-border rounded px-3 py-1.5 text-xs text-foreground shadow-soft whitespace-nowrap"
           style={{
             left: `${(tooltip.x / 500) * 100}%`,
             top: `${(tooltip.y / 500) * 100}%`,
