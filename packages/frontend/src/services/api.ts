@@ -74,21 +74,21 @@ export class ApiError extends Error {
 
 // ── Auth ──
 
-export async function login(data: LoginRequest): Promise<{ user: User; tokens: AuthTokens }> {
-  const result = await request<{ user: User; tokens: AuthTokens }>('/auth/login', {
+export async function login(data: LoginRequest): Promise<{ user: User; accessToken: string }> {
+  const result = await request<{ user: User; accessToken: string }>('/auth/login', {
     method: 'POST',
     body: JSON.stringify(data),
   });
-  accessToken = result.tokens.accessToken;
+  accessToken = result.accessToken;
   return result;
 }
 
-export async function register(data: RegisterRequest): Promise<{ user: User; tokens: AuthTokens }> {
-  const result = await request<{ user: User; tokens: AuthTokens }>('/auth/register', {
+export async function register(data: RegisterRequest): Promise<{ user: User; accessToken: string }> {
+  const result = await request<{ user: User; accessToken: string }>('/auth/register', {
     method: 'POST',
     body: JSON.stringify(data),
   });
-  accessToken = result.tokens.accessToken;
+  accessToken = result.accessToken;
   return result;
 }
 
@@ -108,7 +108,8 @@ export async function refreshToken(): Promise<boolean> {
 }
 
 export async function getMe(): Promise<User> {
-  return request<User>('/auth/me');
+  const result = await request<{ user: User }>('/auth/me');
+  return result.user;
 }
 
 // ── Profiles ──
