@@ -1,0 +1,56 @@
+name: Tests
+
+on: [pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: star_test
+          POSTGRES_PASSWORD: star_test_password
+          POSTGRES_DB: star_astrology_test
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U star_test -d star_astrology_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6380:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://star_test:star_test_password@localhost:5433/star_astrology_test
+      REDIS_URL: redis://localhost:6380
+      JWT_SECRET: ci-test-jwt-secret
+      FRONTEND_URL: http://localhost:5173
+      MERCADO_PAGO_ACCESS_TOKEN: TEST-fake-mp-token
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - run: npm install
+
+      - run: npm run build -w packages/shared
+
+      - run: npm run test:unit -w packages/backend
+
+      - run: npm run test:integration -w packages/backend

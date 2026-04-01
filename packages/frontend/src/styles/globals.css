@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-cosmic-dark text-white font-body antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-celestial-600 hover:bg-celestial-500 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200;
+  }
+
+  .btn-secondary {
+    @apply border border-celestial-400 text-celestial-300 hover:bg-celestial-900/30 font-medium py-2 px-6 rounded-lg transition-colors duration-200;
+  }
+
+  .card {
+    @apply bg-cosmic-deep/50 border border-celestial-800/30 rounded-xl backdrop-blur-sm;
+  }
+}

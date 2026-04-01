@@ -1,0 +1,20 @@
+[
+  {
+    "label": "Sao Paulo J2000",
+    "julianDay": 2451545.0,
+    "latitude": -23.55,
+    "longitude": -46.63,
+    "houseSystem": "P",
+    "ascendant": 39.5,
+    "mc": 290.0
+  },
+  {
+    "label": "London 1990",
+    "julianDay": 2448078.0,
+    "latitude": 51.50,
+    "longitude": -0.12,
+    "houseSystem": "P",
+    "ascendant": 195.0,
+    "mc": 110.0
+  }
+]

@@ -1,0 +1,35 @@
+[
+  {
+    "label": "J2000.0",
+    "date": "2000-01-01T12:00:00Z",
+    "julianDay": 2451545.0,
+    "planets": {
+      "Sun": { "longitude": 280.37, "sign": "Capricorn", "degree": 10 },
+      "Moon": { "longitude": 218.47, "sign": "Scorpio", "degree": 8 },
+      "Mercury": { "longitude": 271.19, "sign": "Capricorn", "degree": 1 },
+      "Venus": { "longitude": 241.31, "sign": "Sagittarius", "degree": 1 },
+      "Mars": { "longitude": 327.04, "sign": "Pisces", "degree": 27 },
+      "Jupiter": { "longitude": 25.25, "sign": "Aries", "degree": 25 },
+      "Saturn": { "longitude": 40.09, "sign": "Taurus", "degree": 10 },
+      "Uranus": { "longitude": 314.54, "sign": "Aquarius", "degree": 14 },
+      "Neptune": { "longitude": 303.24, "sign": "Aquarius", "degree": 3 },
+      "Pluto": { "longitude": 251.39, "sign": "Sagittarius", "degree": 11 }
+    }
+  },
+  {
+    "label": "Spring Equinox 2024",
+    "date": "2024-03-20T12:00:00Z",
+    "julianDay": 2460389.0,
+    "planets": {
+      "Sun": { "longitude": 0.16, "sign": "Aries", "degree": 0 }
+    }
+  },
+  {
+    "label": "Winter Solstice 1950",
+    "date": "1950-12-22T12:00:00Z",
+    "julianDay": 2433619.0,
+    "planets": {
+      "Sun": { "longitude": 269.96, "sign": "Sagittarius", "degree": 29 }
+    }
+  }
+]

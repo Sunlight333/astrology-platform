@@ -1,0 +1,388 @@
+import { useEffect, useState, useMemo, useCallback } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight, ArrowLeft, X } from 'lucide-react';
+import * as api from '../services/api';
+import type { TransitAspect, TransitEvent } from '@star/shared';
+import type { Planet, AspectType } from '@star/shared';
+
+// ── Glyphs & Labels ──
+
+const PLANET_GLYPHS: Record<Planet, string> = {
+  Sun: '\u2609', Moon: '\u263D', Mercury: '\u263F', Venus: '\u2640', Mars: '\u2642',
+  Jupiter: '\u2643', Saturn: '\u2644', Uranus: '\u2645', Neptune: '\u2646', Pluto: '\u2647',
+};
+
+const PLANET_NAMES_PT: Record<Planet, string> = {
+  Sun: 'Sol', Moon: 'Lua', Mercury: 'Mercurio', Venus: 'Venus', Mars: 'Marte',
+  Jupiter: 'Jupiter', Saturn: 'Saturno', Uranus: 'Urano', Neptune: 'Netuno', Pluto: 'Plutao',
+};
+
+const ASPECT_SYMBOLS: Record<AspectType, string> = {
+  conjunction: '\u260C',
+  opposition: '\u260D',
+  trine: '\u25B3',
+  square: '\u25A1',
+  sextile: '\u2731',
+  quincunx: '\u26BB',
+  semisextile: '\u26BA',
+  semisquare: '\u2220',
+  sesquiquadrate: '\u2A3E',
+};
+
+const ASPECT_NAMES_PT: Record<string, string> = {
+  conjunction: 'Conjuncao',
+  opposition: 'Oposicao',
+  trine: 'Trigono',
+  square: 'Quadratura',
+  sextile: 'Sextil',
+  quincunx: 'Quincuncio',
+  semisextile: 'Semisextil',
+  semisquare: 'Semiquadratura',
+  sesquiquadrate: 'Sesquiquadratura',
+};
+
+const ASPECT_DOT_COLORS: Record<string, string> = {
+  conjunction: 'text-yellow-400',
+  trine: 'text-sky-400',
+  sextile: 'text-green-400',
+  square: 'text-red-400',
+  opposition: 'text-red-500',
+  quincunx: 'text-purple-400',
+  semisextile: 'text-green-300',
+  semisquare: 'text-red-300',
+  sesquiquadrate: 'text-red-300',
+};
+
+const MONTH_NAMES_PT = [
+  'Janeiro', 'Fevereiro', 'Marco', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+];
+
+const WEEKDAY_NAMES_PT = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
+
+// ── Helpers ──
+
+function getMonthDays(year: number, month: number): Date[] {
+  const days: Date[] = [];
+  const d = new Date(year, month, 1);
+  while (d.getMonth() === month) {
+    days.push(new Date(d));
+    d.setDate(d.getDate() + 1);
+  }
+  return days;
+}
+
+function dateKey(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
+function monthDiff(a: Date, b: Date): number {
+  return (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth());
+}
+
+function hasExactTransit(transits: TransitAspect[]): boolean {
+  return transits.some((t) => t.currentOrb < 0.5);
+}
+
+export default function TransitCalendarPage() {
+  const { birthProfileId } = useParams<{ birthProfileId: string }>();
+  const now = new Date();
+  const [year, setYear] = useState(now.getFullYear());
+  const [month, setMonth] = useState(now.getMonth());
+  const [events, setEvents] = useState<TransitEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+
+  const currentMonth = useMemo(() => new Date(year, month, 1), [year, month]);
+  const maxMonth = useMemo(() => {
+    const m = new Date(now);
+    m.setMonth(m.getMonth() + 3);
+    return m;
+  }, []);
+
+  const canGoForward = monthDiff(currentMonth, maxMonth) > 0;
+  const canGoBack = monthDiff(new Date(now.getFullYear(), now.getMonth(), 1), currentMonth) > 0;
+
+  const goForward = useCallback(() => {
+    if (!canGoForward) return;
+    if (month === 11) {
+      setYear((y) => y + 1);
+      setMonth(0);
+    } else {
+      setMonth((m) => m + 1);
+    }
+  }, [month, canGoForward]);
+
+  const goBack = useCallback(() => {
+    if (!canGoBack) return;
+    if (month === 0) {
+      setYear((y) => y - 1);
+      setMonth(11);
+    } else {
+      setMonth((m) => m - 1);
+    }
+  }, [month, canGoBack]);
+
+  // Fetch transit events for the current month
+  useEffect(() => {
+    if (!birthProfileId) return;
+    let cancelled = false;
+    setLoading(true);
+
+    const start = new Date(year, month, 1);
+    const end = new Date(year, month + 1, 0); // last day of month
+    const startStr = dateKey(start);
+    const endStr = dateKey(end);
+
+    (async () => {
+      try {
+        const data = await api.getTransitRange(birthProfileId, startStr, endStr);
+        if (!cancelled) setEvents(data);
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Erro ao carregar calendario');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [birthProfileId, year, month]);
+
+  // Build map: date string -> transits
+  const transitsByDate = useMemo(() => {
+    const map: Record<string, TransitAspect[]> = {};
+    for (const event of events) {
+      const key = event.date.slice(0, 10);
+      if (!map[key]) map[key] = [];
+      map[key].push(...event.transits);
+    }
+    return map;
+  }, [events]);
+
+  const days = useMemo(() => getMonthDays(year, month), [year, month]);
+  const firstDayOfWeek = days[0]?.getDay() ?? 0;
+
+  // Detail panel for selected date
+  const selectedTransits = selectedDate ? (transitsByDate[selectedDate] || []) : [];
+
+  return (
+    <div className="max-w-5xl mx-auto px-4 py-10">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mb-8"
+      >
+        <div className="flex items-center gap-3 mb-4">
+          <Link to={`/transits/${birthProfileId}`} className="text-star-silver hover:text-white transition-colors">
+            <ArrowLeft size={20} />
+          </Link>
+          <h1 className="font-display text-3xl text-celestial-200">
+            Calendario de Transitos
+          </h1>
+        </div>
+      </motion.div>
+
+      {/* Month Navigation */}
+      <div className="flex items-center justify-between mb-6">
+        <button
+          onClick={goBack}
+          disabled={!canGoBack}
+          className="p-2 rounded-lg hover:bg-celestial-800/30 transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-celestial-300"
+        >
+          <ChevronLeft size={24} />
+        </button>
+        <h2 className="font-display text-xl text-celestial-200">
+          {MONTH_NAMES_PT[month]} {year}
+        </h2>
+        <button
+          onClick={goForward}
+          disabled={!canGoForward}
+          className="p-2 rounded-lg hover:bg-celestial-800/30 transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-celestial-300"
+        >
+          <ChevronRight size={24} />
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="w-10 h-10 border-2 border-celestial-400 border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : error ? (
+        <div className="card p-8 text-center">
+          <p className="text-red-400">{error}</p>
+        </div>
+      ) : (
+        <>
+          {/* Calendar Grid */}
+          <motion.div
+            key={`${year}-${month}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            {/* Weekday headers */}
+            <div className="grid grid-cols-7 gap-1 mb-1">
+              {WEEKDAY_NAMES_PT.map((wd) => (
+                <div key={wd} className="text-center text-xs text-star-silver/60 py-2 font-medium">
+                  {wd}
+                </div>
+              ))}
+            </div>
+
+            {/* Day cells */}
+            <div className="grid grid-cols-7 gap-1">
+              {/* Empty cells before first day */}
+              {Array.from({ length: firstDayOfWeek }).map((_, i) => (
+                <div key={`empty-${i}`} className="aspect-square" />
+              ))}
+
+              {days.map((day) => {
+                const key = dateKey(day);
+                const dayTransits = transitsByDate[key] || [];
+                const isToday = key === dateKey(now);
+                const exact = hasExactTransit(dayTransits);
+                const isSelected = selectedDate === key;
+
+                // Unique transit planets for glyphs
+                const uniquePlanets = [...new Set(dayTransits.map((t) => t.transitPlanet))];
+
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setSelectedDate(isSelected ? null : key)}
+                    className={`
+                      aspect-square rounded-lg border transition-all text-left p-1.5 sm:p-2 flex flex-col
+                      ${isSelected
+                        ? 'border-celestial-400 bg-celestial-800/30'
+                        : exact
+                          ? 'border-yellow-500/40 bg-yellow-500/5 hover:bg-yellow-500/10'
+                          : dayTransits.length > 0
+                            ? 'border-celestial-800/30 bg-cosmic-deeper/50 hover:bg-celestial-800/20'
+                            : 'border-celestial-900/20 bg-cosmic-deeper/30 hover:bg-celestial-800/10'
+                      }
+                      ${isToday ? 'ring-1 ring-celestial-400/50' : ''}
+                    `}
+                  >
+                    <span className={`text-xs font-medium ${isToday ? 'text-celestial-300' : 'text-star-silver/70'}`}>
+                      {day.getDate()}
+                    </span>
+                    {uniquePlanets.length > 0 && (
+                      <div className="flex flex-wrap gap-0.5 mt-auto">
+                        {uniquePlanets.slice(0, 5).map((planet) => (
+                          <span
+                            key={planet}
+                            className={`text-xs ${exact ? 'text-yellow-400' : 'text-celestial-400'}`}
+                            title={PLANET_NAMES_PT[planet]}
+                          >
+                            {PLANET_GLYPHS[planet]}
+                          </span>
+                        ))}
+                        {uniquePlanets.length > 5 && (
+                          <span className="text-xs text-star-silver/50">+{uniquePlanets.length - 5}</span>
+                        )}
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+
+          {/* Legend */}
+          <div className="flex items-center gap-4 mt-4 text-xs text-star-silver/60 flex-wrap">
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-3 rounded border border-yellow-500/40 bg-yellow-500/10 inline-block" />
+              Transito exato
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-3 rounded border border-celestial-800/30 bg-cosmic-deeper/50 inline-block" />
+              Transitos ativos
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-3 rounded ring-1 ring-celestial-400/50 inline-block" />
+              Hoje
+            </span>
+          </div>
+
+          {/* Detail Panel */}
+          <AnimatePresence>
+            {selectedDate && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.3 }}
+                className="mt-6 card p-5 border border-celestial-700/40"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-display text-lg text-celestial-200">
+                    {new Date(selectedDate + 'T12:00:00').toLocaleDateString('pt-BR', {
+                      weekday: 'long',
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                  </h3>
+                  <button
+                    onClick={() => setSelectedDate(null)}
+                    className="text-star-silver hover:text-white transition-colors"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+
+                {selectedTransits.length === 0 ? (
+                  <p className="text-star-silver text-sm">Nenhum transito nesta data.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {selectedTransits.map((t, i) => {
+                      const dotColor = ASPECT_DOT_COLORS[t.aspectType] || 'text-celestial-400';
+                      const isExact = t.currentOrb < 0.5;
+
+                      return (
+                        <div
+                          key={i}
+                          className="flex items-center justify-between py-2 border-b border-celestial-900/30 last:border-0"
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-xl text-celestial-200" title={PLANET_NAMES_PT[t.transitPlanet]}>
+                              {PLANET_GLYPHS[t.transitPlanet]}
+                            </span>
+                            <span className={`text-sm ${dotColor}`}>
+                              {ASPECT_SYMBOLS[t.aspectType]}
+                            </span>
+                            <span className="text-xl text-star-silver" title={PLANET_NAMES_PT[t.natalPlanet]}>
+                              {PLANET_GLYPHS[t.natalPlanet]}
+                            </span>
+                            <div className="ml-1">
+                              <p className="text-sm text-celestial-200">
+                                {PLANET_NAMES_PT[t.transitPlanet]} {ASPECT_NAMES_PT[t.aspectType]} {PLANET_NAMES_PT[t.natalPlanet]}
+                              </p>
+                              {isExact && (
+                                <span className="text-xs text-yellow-400 font-semibold">EXATO</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-right text-xs">
+                            <span className="text-celestial-300">Orbe: {t.currentOrb.toFixed(2)}\u00b0</span>
+                            <span className={`ml-2 ${t.isApplying ? 'text-sky-400' : 'text-orange-400'}`}>
+                              {t.isApplying ? 'Aplicando' : 'Separando'}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </>
+      )}
+    </div>
+  );
+}

@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String         @id @default(uuid()) @db.Uuid
+  email        String         @unique
+  passwordHash String         @map("password_hash")
+  name         String
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+
+  birthProfiles BirthProfile[]
+  orders        Order[]
+
+  @@map("users")
+}
+
+model BirthProfile {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  name           String
+  birthDate      DateTime @map("birth_date") @db.Date
+  birthTime      String   @map("birth_time")
+  birthCity      String   @map("birth_city")
+  birthLatitude  Float    @map("birth_latitude")
+  birthLongitude Float    @map("birth_longitude")
+  timezoneId     String   @map("timezone_id")
+  utcDatetime    DateTime @map("utc_datetime")
+  julianDay      Float    @map("julian_day")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  natalCharts   NatalChart[]
+  transitReports TransitReport[]
+
+  @@map("birth_profiles")
+}
+
+model NatalChart {
+  id                  String   @id @default(uuid()) @db.Uuid
+  birthProfileId      String   @map("birth_profile_id") @db.Uuid
+  orderId             String?  @map("order_id") @db.Uuid
+  planetaryPositions  Json     @map("planetary_positions")
+  houseCusps          Json     @map("house_cusps")
+  aspects             Json
+  calculatedAt        DateTime @default(now()) @map("calculated_at")
+  isPaid              Boolean  @default(false) @map("is_paid")
+
+  birthProfile BirthProfile @relation(fields: [birthProfileId], references: [id], onDelete: Cascade)
+  order        Order?       @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@map("natal_charts")
+}
+
+model InterpretiveText {
+  id            String   @id @default(uuid()) @db.Uuid
+  category      String
+  planet        String
+  sign          String?
+  house         Int?
+  aspectType    String?  @map("aspect_type")
+  transitPlanet String?  @map("transit_planet")
+  title         String
+  body          String   @db.Text
+  author        String
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("interpretive_texts")
+}
+
+model Order {
+  id              String    @id @default(uuid()) @db.Uuid
+  userId          String    @map("user_id") @db.Uuid
+  productType     String    @map("product_type")
+  status          String    @default("pending")
+  amount          Float
+  mpPaymentId     String?   @map("mp_payment_id")
+  mpPreferenceId  String?   @map("mp_preference_id")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  paidAt          DateTime? @map("paid_at")
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  natalCharts   NatalChart[]
+  transitReports TransitReport[]
+
+  @@map("orders")
+}
+
+model Product {
+  id        String   @id @default(uuid()) @db.Uuid
+  type      String   @unique
+  name      String
+  priceBrl  Float    @map("price_brl")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("products")
+}
+
+model TransitReport {
+  id             String   @id @default(uuid()) @db.Uuid
+  birthProfileId String   @map("birth_profile_id") @db.Uuid
+  orderId        String   @map("order_id") @db.Uuid
+  transitDate    DateTime @map("transit_date")
+  activeTransits Json     @map("active_transits")
+  generatedAt    DateTime @default(now()) @map("generated_at")
+
+  birthProfile BirthProfile @relation(fields: [birthProfileId], references: [id], onDelete: Cascade)
+  order        Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("transit_reports")
+}
+
+model GeocodingCache {
+  id               String   @id @default(uuid()) @db.Uuid
+  queryNormalized  String   @unique @map("query_normalized")
+  latitude         Float
+  longitude        Float
+  formattedAddress String   @map("formatted_address")
+  timezoneId       String   @map("timezone_id")
+  provider         String
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  @@map("geocoding_cache")
+}
