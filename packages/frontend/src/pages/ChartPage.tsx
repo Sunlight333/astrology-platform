@@ -65,20 +65,20 @@ function PlanetSection({
   );
 
   return (
-    <div className="bg-card rounded-2xl shadow-soft border border-border/50 overflow-hidden">
+    <div className="card overflow-hidden">
       <button
-        className="w-full p-4 flex items-center justify-between hover:bg-muted/30 transition-colors"
+        className="w-full -m-6 p-6 flex items-center justify-between hover:bg-muted/30 transition-colors duration-200"
         onClick={() => setOpen(!open)}
       >
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-rose-light flex items-center justify-center">
+        <div className="flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl bg-primary-50 flex items-center justify-center flex-shrink-0">
             <span className="text-primary text-xl">{PLANET_GLYPHS[position.planet]}</span>
           </div>
           <div className="text-left">
-            <h3 className="text-foreground font-medium font-body">
+            <h3 className="text-foreground font-medium text-sm">
               {PLANET_NAMES_PT[position.planet]} em {SIGN_NAMES_PT[position.sign]}
             </h3>
-            <p className="text-muted-foreground text-xs font-body">
+            <p className="text-muted-foreground text-xs mt-0.5">
               {position.degree}°{String(position.minute).padStart(2, '0')}' - Casa {house}
               {position.isRetrograde ? ' (Retrogrado)' : ''}
             </p>
@@ -86,7 +86,7 @@ function PlanetSection({
         </div>
         <ChevronDown
           size={18}
-          className={`text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`}
+          className={`text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
         />
       </button>
 
@@ -99,21 +99,21 @@ function PlanetSection({
             transition={{ duration: 0.3 }}
             className="overflow-hidden"
           >
-            <div className="px-4 pb-4 border-t border-border/50">
-              <p className="text-muted-foreground text-sm mt-3 mb-4 italic font-body">
+            <div className="pt-6 mt-6 border-t border-border/40">
+              <p className="text-muted-foreground text-sm italic leading-relaxed">
                 Interpretacao em breve.
               </p>
 
               {planetAspects.length > 0 && (
-                <div>
-                  <h4 className="text-xs font-medium uppercase tracking-[0.2em] text-secondary mb-2">
+                <div className="mt-5">
+                  <h4 className="section-overline mb-3">
                     Aspectos
                   </h4>
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
                     {planetAspects.map((asp, i) => {
                       const other = asp.planetA === position.planet ? asp.planetB : asp.planetA;
                       return (
-                        <p key={i} className="text-muted-foreground text-xs font-body">
+                        <p key={i} className="text-muted-foreground text-xs">
                           {ASPECT_NAMES_PT[asp.aspectType] || asp.aspectType} com{' '}
                           {PLANET_NAMES_PT[other]} (orbe {asp.orb.toFixed(1)}°)
                         </p>
@@ -164,9 +164,9 @@ export default function ChartPage() {
 
   if (error || !chart) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center bg-background">
-        <div className="bg-card rounded-2xl p-8 shadow-soft border border-border/50 text-center">
-          <p className="text-red-500 mb-4 font-body">{error || 'Mapa nao encontrado.'}</p>
+      <div className="min-h-[60vh] flex items-center justify-center bg-background px-6">
+        <div className="card-elevated p-10 text-center max-w-md">
+          <p className="text-destructive mb-6">{error || 'Mapa nao encontrado.'}</p>
           <Link to="/dashboard" className="btn-secondary">Voltar ao Painel</Link>
         </div>
       </div>
@@ -182,57 +182,57 @@ export default function ChartPage() {
   const otherPlanets = chart.planetaryPositions.filter((p) => !bigThree.includes(p.planet));
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-10">
+    <div className="max-w-4xl mx-auto px-6 py-16">
       {/* Wheel */}
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6 }}
-        className="mb-10"
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+        className="card-elevated p-6 mb-10"
       >
         <ZodiacWheel chart={chart} />
       </motion.div>
 
       {/* Sun, Moon, Ascendant summary */}
       <motion.div
-        className="bg-card rounded-2xl p-6 shadow-soft border border-border/50 mb-8"
-        initial={{ opacity: 0, y: 15 }}
+        className="card-elevated p-8 mb-10"
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.5 }}
       >
-        <h2 className="font-display font-light text-xl text-foreground mb-4">
+        <h2 className="font-display text-display-md text-foreground mb-6">
           Seu Sol, Lua e Ascendente
         </h2>
-        <div className="grid sm:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-3 gap-6">
           {sun && (
             <div className="text-center">
-              <div className="w-12 h-12 mx-auto rounded-full bg-rose-light flex items-center justify-center mb-2">
+              <div className="w-14 h-14 mx-auto rounded-2xl bg-primary-50 flex items-center justify-center mb-3">
                 <span className="text-primary text-2xl">{PLANET_GLYPHS.Sun}</span>
               </div>
-              <p className="text-foreground font-medium font-body mt-1">Sol em {SIGN_NAMES_PT[sun.sign]}</p>
-              <p className="text-muted-foreground text-xs font-body">
+              <p className="text-foreground font-medium mt-1">Sol em {SIGN_NAMES_PT[sun.sign]}</p>
+              <p className="text-muted-foreground text-xs mt-1">
                 {sun.degree}°{String(sun.minute).padStart(2, '0')}' - Casa {findHouse(sun.longitude, chart.houseCusps)}
               </p>
             </div>
           )}
           {moon && (
             <div className="text-center">
-              <div className="w-12 h-12 mx-auto rounded-full bg-rose-light flex items-center justify-center mb-2">
+              <div className="w-14 h-14 mx-auto rounded-2xl bg-primary-50 flex items-center justify-center mb-3">
                 <span className="text-primary text-2xl">{PLANET_GLYPHS.Moon}</span>
               </div>
-              <p className="text-foreground font-medium font-body mt-1">Lua em {SIGN_NAMES_PT[moon.sign]}</p>
-              <p className="text-muted-foreground text-xs font-body">
+              <p className="text-foreground font-medium mt-1">Lua em {SIGN_NAMES_PT[moon.sign]}</p>
+              <p className="text-muted-foreground text-xs mt-1">
                 {moon.degree}°{String(moon.minute).padStart(2, '0')}' - Casa {findHouse(moon.longitude, chart.houseCusps)}
               </p>
             </div>
           )}
           {ascSign && (
             <div className="text-center">
-              <div className="w-12 h-12 mx-auto rounded-full bg-rose-light flex items-center justify-center mb-2">
-                <span className="text-primary text-lg font-display font-medium">AC</span>
+              <div className="w-14 h-14 mx-auto rounded-2xl bg-gold-50 flex items-center justify-center mb-3">
+                <span className="text-gold text-lg font-display font-medium">AC</span>
               </div>
-              <p className="text-foreground font-medium font-body mt-1">Ascendente em {SIGN_NAMES_PT[ascSign.sign]}</p>
-              <p className="text-muted-foreground text-xs font-body">
+              <p className="text-foreground font-medium mt-1">Ascendente em {SIGN_NAMES_PT[ascSign.sign]}</p>
+              <p className="text-muted-foreground text-xs mt-1">
                 {ascSign.degree}°
               </p>
             </div>
@@ -241,7 +241,7 @@ export default function ChartPage() {
       </motion.div>
 
       {/* Planet details - Sun & Moon always visible */}
-      <div className="space-y-3 mb-6">
+      <div className="space-y-4 mb-8">
         {chart.planetaryPositions
           .filter((p) => bigThree.includes(p.planet))
           .map((p) => (
@@ -258,22 +258,24 @@ export default function ChartPage() {
       {/* Rest of planets - blurred if not paid */}
       <div className="relative">
         {!isPaid && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm rounded-xl">
-            <div className="w-14 h-14 rounded-full bg-rose-light flex items-center justify-center mb-3">
-              <Lock size={24} className="text-gold" />
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm rounded-2xl">
+            <div className="card-elevated p-8 text-center max-w-sm">
+              <div className="w-16 h-16 mx-auto rounded-2xl bg-gold-50 flex items-center justify-center mb-4">
+                <Lock size={24} className="text-gold" />
+              </div>
+              <p className="font-display text-display-md text-foreground mb-2">Conteudo Completo</p>
+              <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+                Desbloqueie a interpretacao completa de todos os planetas, casas e aspectos.
+              </p>
+              <Link to="/pricing" className="btn-gold w-full">
+                Ver Precos
+              </Link>
             </div>
-            <p className="text-foreground font-display font-light text-lg mb-2">Conteudo Completo</p>
-            <p className="text-muted-foreground text-sm mb-4 text-center max-w-sm font-body">
-              Desbloqueie a interpretacao completa de todos os planetas, casas e aspectos.
-            </p>
-            <Link to="/pricing" className="btn-gold">
-              Ver Precos
-            </Link>
           </div>
         )}
 
         <div className={!isPaid ? 'blur-sm pointer-events-none select-none' : ''}>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {otherPlanets.map((p) => (
               <PlanetSection
                 key={p.planet}

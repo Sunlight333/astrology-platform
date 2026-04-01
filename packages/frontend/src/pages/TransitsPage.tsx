@@ -44,19 +44,19 @@ const ASPECT_NAMES_PT: Record<string, string> = {
   sesquiquadrate: 'Sesquiquadratura',
 };
 
-const ASPECT_COLORS: Record<string, { border: string; bg: string; text: string }> = {
-  conjunction: { border: 'border-gold/50', bg: 'bg-gold/10', text: 'text-gold' },
-  trine: { border: 'border-primary/50', bg: 'bg-primary/10', text: 'text-primary' },
-  sextile: { border: 'border-green-500/50', bg: 'bg-green-500/10', text: 'text-green-600' },
-  square: { border: 'border-red-400/50', bg: 'bg-red-400/10', text: 'text-red-500' },
-  opposition: { border: 'border-red-500/50', bg: 'bg-red-500/10', text: 'text-red-600' },
-  quincunx: { border: 'border-purple-400/50', bg: 'bg-purple-400/10', text: 'text-purple-500' },
-  semisextile: { border: 'border-green-400/50', bg: 'bg-green-400/10', text: 'text-green-500' },
-  semisquare: { border: 'border-red-300/50', bg: 'bg-red-300/10', text: 'text-red-400' },
-  sesquiquadrate: { border: 'border-red-300/50', bg: 'bg-red-300/10', text: 'text-red-400' },
+const ASPECT_COLORS: Record<string, { bg: string; text: string }> = {
+  conjunction: { bg: 'bg-gold-50', text: 'text-gold' },
+  trine: { bg: 'bg-primary-50', text: 'text-primary' },
+  sextile: { bg: 'bg-emerald-50', text: 'text-success' },
+  square: { bg: 'bg-red-50', text: 'text-red-500' },
+  opposition: { bg: 'bg-red-50', text: 'text-red-600' },
+  quincunx: { bg: 'bg-purple-50', text: 'text-purple-500' },
+  semisextile: { bg: 'bg-emerald-50', text: 'text-green-500' },
+  semisquare: { bg: 'bg-red-50', text: 'text-red-400' },
+  sesquiquadrate: { bg: 'bg-red-50', text: 'text-red-400' },
 };
 
-const DEFAULT_COLORS = { border: 'border-border/50', bg: 'bg-muted/30', text: 'text-muted-foreground' };
+const DEFAULT_COLORS = { bg: 'bg-muted', text: 'text-muted-foreground' };
 
 const FREE_TRANSIT_LIMIT = 3;
 
@@ -78,13 +78,6 @@ function sortTransits(transits: TransitAspect[]): TransitAspect[] {
 
 function orbOpacity(orb: number): number {
   return Math.max(0.5, 1 - orb / 12);
-}
-
-function orbGlow(orb: number): string {
-  if (orb < 0.5) return 'shadow-lg shadow-gold/20';
-  if (orb < 1) return 'shadow-md shadow-primary/15';
-  if (orb < 3) return 'shadow-sm shadow-primary/10';
-  return '';
 }
 
 export default function TransitsPage() {
@@ -133,10 +126,10 @@ export default function TransitsPage() {
 
   if (error) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-10">
-        <div className="bg-card rounded-2xl p-8 shadow-soft border border-border/50 text-center">
-          <p className="text-red-500 mb-4 font-body">{error}</p>
-          <Link to="/dashboard" className="btn-secondary text-sm py-2 px-4">
+      <div className="max-w-4xl mx-auto px-6 py-16">
+        <div className="card-elevated p-10 text-center">
+          <p className="text-destructive mb-6">{error}</p>
+          <Link to="/dashboard" className="btn-secondary">
             Voltar ao Painel
           </Link>
         </div>
@@ -148,29 +141,29 @@ export default function TransitsPage() {
   const lockedTransits = isPaid ? [] : transits.slice(FREE_TRANSIT_LIMIT);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-10">
+    <div className="max-w-6xl mx-auto px-6 py-16">
       {/* Header */}
       <motion.div
-        initial={{ opacity: 0, y: 15 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mb-8"
+        className="mb-10"
       >
         <div className="flex items-center gap-3 mb-4">
-          <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
+          <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors duration-200">
             <ArrowLeft size={20} />
           </Link>
-          <h1 className="font-display font-light text-3xl text-foreground">
+          <h1 className="font-display text-display-lg text-foreground">
             Transitos Ativos
           </h1>
         </div>
         <div className="flex items-center gap-4 flex-wrap">
-          <p className="text-muted-foreground font-body">
+          <p className="text-muted-foreground">
             {transits.length} transito{transits.length !== 1 ? 's' : ''} ativo{transits.length !== 1 ? 's' : ''}
           </p>
           <Link
             to={`/transits/${birthProfileId}/calendar`}
-            className="btn-secondary text-sm py-1.5 px-4 inline-flex items-center gap-2"
+            className="btn-secondary !py-2 !px-4 text-sm inline-flex items-center gap-2"
           >
             <Calendar size={14} /> Calendario
           </Link>
@@ -186,11 +179,13 @@ export default function TransitsPage() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <TransitWheel
-              chart={chart}
-              transitPositions={transitPositions}
-              transitAspects={transits}
-            />
+            <div className="card-elevated p-4">
+              <TransitWheel
+                chart={chart}
+                transitPositions={transitPositions}
+                transitAspects={transits}
+              />
+            </div>
           </motion.div>
         )}
 
@@ -201,13 +196,12 @@ export default function TransitsPage() {
               {visibleTransits.map((t, i) => {
                 const colors = ASPECT_COLORS[t.aspectType] || DEFAULT_COLORS;
                 const opacity = orbOpacity(t.currentOrb);
-                const glow = orbGlow(t.currentOrb);
                 const isExact = t.currentOrb < 0.5;
 
                 return (
                   <motion.div
                     key={`${t.transitPlanet}-${t.aspectType}-${t.natalPlanet}`}
-                    className={`bg-card rounded-2xl p-4 shadow-soft border ${colors.border} ${glow} transition-all`}
+                    className="card p-5 transition-all duration-200 hover:shadow-card"
                     style={{ opacity }}
                     initial={{ opacity: 0, x: 30 }}
                     animate={{ opacity, x: 0 }}
@@ -217,39 +211,41 @@ export default function TransitsPage() {
                     <div className="flex items-center justify-between flex-wrap gap-3">
                       {/* Planet glyphs + aspect */}
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-rose-light flex items-center justify-center">
-                          <span className="text-xl text-primary" title={PLANET_NAMES_PT[t.transitPlanet]}>
+                        <div className={`w-10 h-10 rounded-xl ${colors.bg} flex items-center justify-center`}>
+                          <span className={`text-lg ${colors.text}`} title={PLANET_NAMES_PT[t.transitPlanet]}>
                             {PLANET_GLYPHS[t.transitPlanet]}
                           </span>
                         </div>
                         <span className={`text-lg ${colors.text}`} title={ASPECT_NAMES_PT[t.aspectType]}>
                           {ASPECT_SYMBOLS[t.aspectType] || t.aspectType}
                         </span>
-                        <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                          <span className="text-xl text-muted-foreground" title={PLANET_NAMES_PT[t.natalPlanet]}>
+                        <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
+                          <span className="text-lg text-muted-foreground" title={PLANET_NAMES_PT[t.natalPlanet]}>
                             {PLANET_GLYPHS[t.natalPlanet]}
                           </span>
                         </div>
-                        <div className="ml-2">
-                          <p className="text-sm text-foreground font-medium font-body">
+                        <div className="ml-1">
+                          <p className="text-sm text-foreground font-medium">
                             {PLANET_NAMES_PT[t.transitPlanet]} {ASPECT_NAMES_PT[t.aspectType]} {PLANET_NAMES_PT[t.natalPlanet]}
                           </p>
                           {isExact && (
-                            <span className="text-xs text-gold font-semibold">EXATO</span>
+                            <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-gold-50 text-gold mt-1">
+                              EXATO
+                            </span>
                           )}
                         </div>
                       </div>
 
                       {/* Orb + status */}
                       <div className="text-right">
-                        <p className="text-sm text-primary font-body">
-                          Orbe: {t.currentOrb.toFixed(2)}\u00b0
+                        <p className="text-sm text-foreground font-medium">
+                          {t.currentOrb.toFixed(2)}\u00b0
                         </p>
-                        <p className={`text-xs ${t.isApplying ? 'text-primary' : 'text-secondary'}`}>
+                        <p className={`text-xs mt-0.5 ${t.isApplying ? 'text-primary' : 'text-muted-foreground'}`}>
                           {t.isApplying ? 'Aplicando' : 'Separando'}
                         </p>
                         {t.exactDate && (
-                          <p className="text-xs text-muted-foreground mt-0.5 font-body">
+                          <p className="text-xs text-muted-foreground mt-0.5">
                             Exato: {new Date(t.exactDate).toLocaleDateString('pt-BR')}
                           </p>
                         )}
@@ -262,7 +258,7 @@ export default function TransitsPage() {
 
             {/* Locked transits (paywall) */}
             {lockedTransits.length > 0 && (
-              <div className="relative mt-4">
+              <div className="relative mt-6">
                 {/* Blurred locked cards */}
                 <div className="space-y-3 filter blur-sm pointer-events-none select-none">
                   {lockedTransits.slice(0, 3).map((t, i) => {
@@ -270,19 +266,23 @@ export default function TransitsPage() {
                     return (
                       <div
                         key={`locked-${i}`}
-                        className={`bg-card rounded-2xl p-4 shadow-soft border ${colors.border}`}
+                        className="card p-5"
                       >
                         <div className="flex items-center gap-3">
-                          <span className="text-2xl text-primary">
-                            {PLANET_GLYPHS[t.transitPlanet]}
-                          </span>
+                          <div className={`w-10 h-10 rounded-xl ${colors.bg} flex items-center justify-center`}>
+                            <span className={`text-lg ${colors.text}`}>
+                              {PLANET_GLYPHS[t.transitPlanet]}
+                            </span>
+                          </div>
                           <span className={`text-lg ${colors.text}`}>
                             {ASPECT_SYMBOLS[t.aspectType]}
                           </span>
-                          <span className="text-2xl text-muted-foreground">
-                            {PLANET_GLYPHS[t.natalPlanet]}
-                          </span>
-                          <p className="text-sm text-foreground ml-2 font-body">
+                          <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
+                            <span className="text-lg text-muted-foreground">
+                              {PLANET_GLYPHS[t.natalPlanet]}
+                            </span>
+                          </div>
+                          <p className="text-sm text-foreground ml-1">
                             {PLANET_NAMES_PT[t.transitPlanet]} {ASPECT_NAMES_PT[t.aspectType]} {PLANET_NAMES_PT[t.natalPlanet]}
                           </p>
                         </div>
@@ -292,20 +292,20 @@ export default function TransitsPage() {
                 </div>
 
                 {/* CTA overlay */}
-                <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-sm rounded-lg">
-                  <div className="text-center">
-                    <div className="w-14 h-14 mx-auto rounded-full bg-rose-light flex items-center justify-center mb-3">
+                <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-sm rounded-2xl">
+                  <div className="card-elevated p-8 text-center max-w-sm">
+                    <div className="w-16 h-16 mx-auto rounded-2xl bg-gold-50 flex items-center justify-center mb-4">
                       <Lock size={24} className="text-gold" />
                     </div>
-                    <p className="text-foreground font-display font-light text-lg mb-2">
+                    <p className="font-display text-display-md text-foreground mb-2">
                       +{lockedTransits.length} transito{lockedTransits.length !== 1 ? 's' : ''} disponive{lockedTransits.length !== 1 ? 'is' : 'l'}
                     </p>
-                    <p className="text-muted-foreground text-sm mb-4 font-body">
+                    <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
                       Desbloqueie todos os transitos com o relatorio completo
                     </p>
                     <Link
                       to="/pricing"
-                      className="btn-gold text-sm py-2 px-6 inline-flex items-center gap-2"
+                      className="btn-gold"
                     >
                       Ver Planos
                     </Link>
@@ -315,8 +315,8 @@ export default function TransitsPage() {
             )}
 
             {transits.length === 0 && (
-              <div className="bg-card rounded-2xl p-8 shadow-soft border border-border/50 text-center">
-                <p className="text-muted-foreground font-body">Nenhum transito ativo no momento.</p>
+              <div className="card-elevated p-10 text-center">
+                <p className="text-muted-foreground">Nenhum transito ativo no momento.</p>
               </div>
             )}
           </div>

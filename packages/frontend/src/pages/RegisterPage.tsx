@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { z } from 'zod';
 import { useAuth } from '../hooks/useAuth';
 import { ApiError } from '../services/api';
@@ -57,78 +58,83 @@ export default function RegisterPage() {
     }
   };
 
-  const fieldClass =
-    'w-full px-4 py-3 rounded-lg border border-input bg-background text-foreground placeholder-muted-foreground/50 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none font-body text-sm transition-colors';
-
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 bg-background">
-      <div className="bg-card rounded-2xl p-8 shadow-soft border border-border/50 w-full max-w-md">
-        <h1 className="font-display font-light text-3xl text-foreground text-center mb-8">
+    <div className="min-h-[80vh] flex items-center justify-center px-6 bg-background">
+      <motion.div
+        className="card-elevated w-full max-w-sm p-8"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+      >
+        <h1 className="font-display text-display-md text-foreground text-center mb-2">
           Criar Conta
         </h1>
+        <p className="text-sm text-muted-foreground text-center mb-8">
+          Comece sua jornada de autoconhecimento astrologico.
+        </p>
 
         {apiError && (
-          <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg p-3 mb-6">
+          <div className="bg-destructive/5 border border-destructive/20 text-destructive text-sm rounded-xl p-3 mb-6">
             {apiError}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1.5">Nome</label>
+            <label htmlFor="name" className="label">Nome</label>
             <input
               id="name" type="text" required
               value={name} onChange={(e) => setName(e.target.value)}
-              className={fieldClass} placeholder="Seu nome"
+              className="input-field" placeholder="Seu nome"
             />
-            {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+            {errors.name && <p className="text-destructive text-xs mt-1.5">{errors.name}</p>}
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1.5">Email</label>
+            <label htmlFor="email" className="label">Email</label>
             <input
               id="email" type="email" required
               value={email} onChange={(e) => setEmail(e.target.value)}
-              className={fieldClass} placeholder="seu@email.com"
+              className="input-field" placeholder="seu@email.com"
             />
-            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+            {errors.email && <p className="text-destructive text-xs mt-1.5">{errors.email}</p>}
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1.5">Senha</label>
+            <label htmlFor="password" className="label">Senha</label>
             <input
               id="password" type="password" required
               value={password} onChange={(e) => setPassword(e.target.value)}
-              className={fieldClass} placeholder="Minimo 6 caracteres"
+              className="input-field" placeholder="Minimo 8 caracteres"
             />
-            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+            {errors.password && <p className="text-destructive text-xs mt-1.5">{errors.password}</p>}
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground mb-1.5">Confirmar Senha</label>
+            <label htmlFor="confirmPassword" className="label">Confirmar Senha</label>
             <input
               id="confirmPassword" type="password" required
               value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
-              className={fieldClass} placeholder="Repita a senha"
+              className="input-field" placeholder="Repita a senha"
             />
-            {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
+            {errors.confirmPassword && <p className="text-destructive text-xs mt-1.5">{errors.confirmPassword}</p>}
           </div>
 
           <button
             type="submit" disabled={loading}
-            className="btn-primary w-full py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-primary w-full"
           >
             {loading ? 'Criando conta...' : 'Criar Conta'}
           </button>
         </form>
 
-        <p className="text-muted-foreground text-sm text-center mt-6">
+        <p className="text-muted-foreground text-sm text-center mt-8">
           Ja tem conta?{' '}
-          <Link to="/login" className="text-primary hover:text-primary-dark underline">
+          <Link to="/login" className="text-primary hover:text-primary-dark font-medium transition-colors duration-200">
             Entrar
           </Link>
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 import { ApiError } from '../services/api';
 
@@ -33,21 +34,29 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 bg-background">
-      <div className="bg-card rounded-2xl p-8 shadow-soft border border-border/50 w-full max-w-md">
-        <h1 className="font-display font-light text-3xl text-foreground text-center mb-8">
+    <div className="min-h-[80vh] flex items-center justify-center px-6 bg-background">
+      <motion.div
+        className="card-elevated w-full max-w-sm p-8"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+      >
+        <h1 className="font-display text-display-md text-foreground text-center mb-2">
           Entrar
         </h1>
+        <p className="text-sm text-muted-foreground text-center mb-8">
+          Acesse sua conta para ver seus mapas astrais.
+        </p>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg p-3 mb-6">
+          <div className="bg-destructive/5 border border-destructive/20 text-destructive text-sm rounded-xl p-3 mb-6">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1.5">
+            <label htmlFor="email" className="label">
               Email
             </label>
             <input
@@ -56,13 +65,13 @@ export default function LoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border border-input bg-background text-foreground placeholder-muted-foreground/50 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none font-body text-sm transition-colors"
+              className="input-field"
               placeholder="seu@email.com"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1.5">
+            <label htmlFor="password" className="label">
               Senha
             </label>
             <input
@@ -71,7 +80,7 @@ export default function LoginPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border border-input bg-background text-foreground placeholder-muted-foreground/50 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none font-body text-sm transition-colors"
+              className="input-field"
               placeholder="Sua senha"
             />
           </div>
@@ -79,19 +88,19 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="btn-primary w-full py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-primary w-full"
           >
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
 
-        <p className="text-muted-foreground text-sm text-center mt-6">
+        <p className="text-muted-foreground text-sm text-center mt-8">
           Nao tem conta?{' '}
-          <Link to="/register" className="text-primary hover:text-primary-dark underline">
+          <Link to="/register" className="text-primary hover:text-primary-dark font-medium transition-colors duration-200">
             Criar conta
           </Link>
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 }

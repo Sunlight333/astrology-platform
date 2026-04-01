@@ -45,7 +45,7 @@ const ASPECT_NAMES_PT: Record<string, string> = {
 const ASPECT_DOT_COLORS: Record<string, string> = {
   conjunction: 'text-gold',
   trine: 'text-primary',
-  sextile: 'text-green-500',
+  sextile: 'text-success',
   square: 'text-red-400',
   opposition: 'text-red-500',
   quincunx: 'text-purple-400',
@@ -132,7 +132,7 @@ export default function TransitCalendarPage() {
     setLoading(true);
 
     const start = new Date(year, month, 1);
-    const end = new Date(year, month + 1, 0); // last day of month
+    const end = new Date(year, month + 1, 0);
     const startStr = dateKey(start);
     const endStr = dateKey(end);
 
@@ -168,52 +168,52 @@ export default function TransitCalendarPage() {
   const selectedTransits = selectedDate ? (transitsByDate[selectedDate] || []) : [];
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-10">
+    <div className="max-w-4xl mx-auto px-6 py-16">
       {/* Header */}
       <motion.div
-        initial={{ opacity: 0, y: 15 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mb-8"
+        className="mb-10"
       >
         <div className="flex items-center gap-3 mb-4">
-          <Link to={`/transits/${birthProfileId}`} className="text-muted-foreground hover:text-foreground transition-colors">
+          <Link to={`/transits/${birthProfileId}`} className="text-muted-foreground hover:text-foreground transition-colors duration-200">
             <ArrowLeft size={20} />
           </Link>
-          <h1 className="font-display font-light text-3xl text-foreground">
+          <h1 className="font-display text-display-lg text-foreground">
             Calendario de Transitos
           </h1>
         </div>
       </motion.div>
 
       {/* Month Navigation */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-8">
         <button
           onClick={goBack}
           disabled={!canGoBack}
-          className="p-2 rounded-lg hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-primary"
+          className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-muted transition-colors duration-200 disabled:opacity-30 disabled:cursor-not-allowed text-primary"
         >
-          <ChevronLeft size={24} />
+          <ChevronLeft size={20} />
         </button>
-        <h2 className="font-display font-light text-xl text-foreground">
+        <h2 className="font-display text-display-md text-foreground">
           {MONTH_NAMES_PT[month]} {year}
         </h2>
         <button
           onClick={goForward}
           disabled={!canGoForward}
-          className="p-2 rounded-lg hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-primary"
+          className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-muted transition-colors duration-200 disabled:opacity-30 disabled:cursor-not-allowed text-primary"
         >
-          <ChevronRight size={24} />
+          <ChevronRight size={20} />
         </button>
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20">
+        <div className="flex items-center justify-center py-24">
           <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
       ) : error ? (
-        <div className="bg-card rounded-2xl p-8 shadow-soft border border-border/50 text-center">
-          <p className="text-red-500 font-body">{error}</p>
+        <div className="card-elevated p-10 text-center">
+          <p className="text-destructive">{error}</p>
         </div>
       ) : (
         <>
@@ -223,18 +223,19 @@ export default function TransitCalendarPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
+            className="card-elevated p-6"
           >
             {/* Weekday headers */}
-            <div className="grid grid-cols-7 gap-1 mb-1">
+            <div className="grid grid-cols-7 gap-1.5 mb-2">
               {WEEKDAY_NAMES_PT.map((wd) => (
-                <div key={wd} className="text-center text-xs text-muted-foreground py-2 font-medium font-body">
+                <div key={wd} className="text-center text-xs text-muted-foreground py-2 font-medium uppercase tracking-wider">
                   {wd}
                 </div>
               ))}
             </div>
 
             {/* Day cells */}
-            <div className="grid grid-cols-7 gap-1">
+            <div className="grid grid-cols-7 gap-1.5">
               {/* Empty cells before first day */}
               {Array.from({ length: firstDayOfWeek }).map((_, i) => (
                 <div key={`empty-${i}`} className="aspect-square" />
@@ -255,19 +256,20 @@ export default function TransitCalendarPage() {
                     key={key}
                     onClick={() => setSelectedDate(isSelected ? null : key)}
                     className={`
-                      aspect-square rounded-lg border transition-all text-left p-1.5 sm:p-2 flex flex-col
+                      aspect-square rounded-xl border transition-all duration-200 text-left p-1.5 sm:p-2 flex flex-col
+                      hover:shadow-soft active:scale-[0.98]
                       ${isSelected
-                        ? 'border-primary bg-primary/10'
+                        ? 'border-primary bg-primary-50 shadow-soft'
                         : exact
-                          ? 'border-gold/40 bg-gold/5 hover:bg-gold/10'
+                          ? 'border-gold/30 bg-gold-50/50 hover:bg-gold-50'
                           : dayTransits.length > 0
-                            ? 'border-border/50 bg-card hover:bg-muted/50'
-                            : 'border-border/30 bg-cream-dark/30 hover:bg-muted/30'
+                            ? 'border-border/40 bg-white hover:bg-muted/50'
+                            : 'border-border/20 bg-muted/20 hover:bg-muted/40'
                       }
-                      ${isToday ? 'ring-1 ring-primary/50' : ''}
+                      ${isToday ? 'ring-2 ring-primary/30' : ''}
                     `}
                   >
-                    <span className={`text-xs font-medium font-body ${isToday ? 'text-primary' : 'text-muted-foreground'}`}>
+                    <span className={`text-xs font-medium ${isToday ? 'text-primary font-semibold' : 'text-muted-foreground'}`}>
                       {day.getDate()}
                     </span>
                     {uniquePlanets.length > 0 && (
@@ -293,17 +295,17 @@ export default function TransitCalendarPage() {
           </motion.div>
 
           {/* Legend */}
-          <div className="flex items-center gap-4 mt-4 text-xs text-muted-foreground flex-wrap font-body">
-            <span className="flex items-center gap-1">
-              <span className="w-3 h-3 rounded border border-gold/40 bg-gold/5 inline-block" />
+          <div className="flex items-center gap-6 mt-6 text-xs text-muted-foreground flex-wrap">
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-md border border-gold/30 bg-gold-50/50 inline-block" />
               Transito exato
             </span>
-            <span className="flex items-center gap-1">
-              <span className="w-3 h-3 rounded border border-border/50 bg-card inline-block" />
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-md border border-border/40 bg-white inline-block" />
               Transitos ativos
             </span>
-            <span className="flex items-center gap-1">
-              <span className="w-3 h-3 rounded ring-1 ring-primary/50 inline-block" />
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-md ring-2 ring-primary/30 inline-block" />
               Hoje
             </span>
           </div>
@@ -316,10 +318,10 @@ export default function TransitCalendarPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
                 transition={{ duration: 0.3 }}
-                className="mt-6 bg-card rounded-2xl p-5 shadow-soft border border-border/50"
+                className="mt-8 card-elevated p-6"
               >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-display font-light text-lg text-foreground">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="font-display text-lg text-foreground">
                     {new Date(selectedDate + 'T12:00:00').toLocaleDateString('pt-BR', {
                       weekday: 'long',
                       day: 'numeric',
@@ -329,16 +331,16 @@ export default function TransitCalendarPage() {
                   </h3>
                   <button
                     onClick={() => setSelectedDate(null)}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-muted transition-colors duration-200 text-muted-foreground hover:text-foreground"
                   >
-                    <X size={18} />
+                    <X size={16} />
                   </button>
                 </div>
 
                 {selectedTransits.length === 0 ? (
-                  <p className="text-muted-foreground text-sm font-body">Nenhum transito nesta data.</p>
+                  <p className="text-muted-foreground text-sm">Nenhum transito nesta data.</p>
                 ) : (
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     {selectedTransits.map((t, i) => {
                       const dotColor = ASPECT_DOT_COLORS[t.aspectType] || 'text-muted-foreground';
                       const isExact = t.currentOrb < 0.5;
@@ -346,7 +348,7 @@ export default function TransitCalendarPage() {
                       return (
                         <div
                           key={i}
-                          className="flex items-center justify-between py-2 border-b border-border/30 last:border-0"
+                          className="flex items-center justify-between py-3 border-b border-border/30 last:border-0"
                         >
                           <div className="flex items-center gap-3">
                             <span className="text-xl text-primary" title={PLANET_NAMES_PT[t.transitPlanet]}>
@@ -359,17 +361,19 @@ export default function TransitCalendarPage() {
                               {PLANET_GLYPHS[t.natalPlanet]}
                             </span>
                             <div className="ml-1">
-                              <p className="text-sm text-foreground font-body">
+                              <p className="text-sm text-foreground font-medium">
                                 {PLANET_NAMES_PT[t.transitPlanet]} {ASPECT_NAMES_PT[t.aspectType]} {PLANET_NAMES_PT[t.natalPlanet]}
                               </p>
                               {isExact && (
-                                <span className="text-xs text-gold font-semibold">EXATO</span>
+                                <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-gold-50 text-gold mt-0.5">
+                                  EXATO
+                                </span>
                               )}
                             </div>
                           </div>
                           <div className="text-right text-xs">
-                            <span className="text-primary font-body">Orbe: {t.currentOrb.toFixed(2)}\u00b0</span>
-                            <span className={`ml-2 ${t.isApplying ? 'text-primary' : 'text-secondary'}`}>
+                            <span className="text-foreground font-medium">{t.currentOrb.toFixed(2)}\u00b0</span>
+                            <span className={`ml-2 ${t.isApplying ? 'text-primary' : 'text-muted-foreground'}`}>
                               {t.isApplying ? 'Aplicando' : 'Separando'}
                             </span>
                           </div>

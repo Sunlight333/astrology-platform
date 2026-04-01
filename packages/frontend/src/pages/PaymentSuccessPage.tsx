@@ -11,7 +11,7 @@ export default function PaymentSuccessPage() {
 
   useEffect(() => {
     if (!orderId) {
-      setStatus('confirmed'); // no order to poll, just show success
+      setStatus('confirmed');
       return;
     }
 
@@ -33,7 +33,7 @@ export default function PaymentSuccessPage() {
         attempts++;
         await new Promise((r) => setTimeout(r, 3000));
       }
-      if (!cancelled) setStatus('confirmed'); // show success anyway after timeout
+      if (!cancelled) setStatus('confirmed');
     };
 
     poll();
@@ -41,20 +41,20 @@ export default function PaymentSuccessPage() {
   }, [orderId]);
 
   return (
-    <div className="min-h-[70vh] flex items-center justify-center px-4 bg-background">
+    <div className="min-h-[70vh] flex items-center justify-center px-6 bg-background">
       <motion.div
-        className="bg-card rounded-2xl p-10 shadow-soft border border-border/50 text-center max-w-md"
-        initial={{ opacity: 0, scale: 0.9 }}
+        className="card-elevated p-10 text-center max-w-md w-full"
+        initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
       >
         {status === 'polling' ? (
           <>
-            <div className="w-16 h-16 mx-auto mb-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-            <h1 className="font-display font-light text-2xl text-foreground mb-3">
+            <div className="w-16 h-16 mx-auto mb-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            <h1 className="font-display text-display-md text-foreground mb-3">
               Processando Pagamento...
             </h1>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-sm leading-relaxed">
               Aguarde enquanto confirmamos seu pagamento.
             </p>
           </>
@@ -64,22 +64,25 @@ export default function PaymentSuccessPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: 'spring', stiffness: 200, damping: 12, delay: 0.2 }}
+              className="mb-8"
             >
-              <CheckCircle size={64} className="text-green-500 mx-auto mb-6" />
+              <div className="w-20 h-20 mx-auto rounded-full bg-emerald-50 flex items-center justify-center">
+                <CheckCircle size={40} className="text-success" />
+              </div>
             </motion.div>
 
-            <h1 className="font-display font-light text-2xl text-foreground mb-3">
+            <h1 className="font-display text-display-md text-foreground mb-3">
               Pagamento Confirmado!
             </h1>
-            <p className="text-muted-foreground text-sm mb-8">
+            <p className="text-muted-foreground text-sm leading-relaxed mb-10">
               Seu pagamento foi processado com sucesso. Seu mapa astral completo ja esta disponivel.
             </p>
 
             <div className="flex flex-col gap-3">
-              <Link to="/dashboard" className="btn-primary py-3">
+              <Link to="/dashboard" className="btn-gold w-full">
                 Ver Meu Mapa Astral
               </Link>
-              <Link to="/dashboard" className="text-primary hover:text-primary-dark text-sm underline">
+              <Link to="/dashboard" className="btn-ghost text-sm">
                 Ir para o Painel
               </Link>
             </div>
