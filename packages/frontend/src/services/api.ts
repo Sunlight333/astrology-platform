@@ -1,7 +1,7 @@
 import type { User, LoginRequest, RegisterRequest, AuthTokens } from '@star/shared';
 import type { BirthProfile, NatalChart } from '@star/shared';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 let accessToken: string | null = null;
 
