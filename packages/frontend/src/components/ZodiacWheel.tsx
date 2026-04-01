@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { NatalChart, PlanetaryPosition, Aspect } from '@star/shared';
 import type { Planet, ZodiacSign } from '@star/shared';
 
@@ -101,6 +101,11 @@ function findHouseForPlanet(longitude: number, houseCusps: { house: number; long
   return 1;
 }
 
+/** Compute the total length of an SVG line segment for stroke-dasharray animation */
+function lineLength(x1: number, y1: number, x2: number, y2: number): number {
+  return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+}
+
 // ── Component ──
 
 interface ZodiacWheelProps {
@@ -109,6 +114,15 @@ interface ZodiacWheelProps {
 
 export default function ZodiacWheel({ chart }: ZodiacWheelProps) {
   const [tooltip, setTooltip] = useState<{ x: number; y: number; text: string } | null>(null);
+  const [hoveredPlanet, setHoveredPlanet] = useState<Planet | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const svgRef = useRef<SVGSVGElement>(null);
+
+  // Trigger entrance animation after mount
+  useEffect(() => {
+    const timer = setTimeout(() => setIsVisible(true), 50);
+    return () => clearTimeout(timer);
+  }, []);
 
   const { planetaryPositions, houseCusps, aspects, angles } = chart;
   const asc = angles.ascendant;
@@ -139,6 +153,8 @@ export default function ZodiacWheel({ chart }: ZodiacWheelProps) {
           fill="#7A7F8E"
           fontSize="14"
           className="select-none"
+          opacity={isVisible ? 1 : 0}
+          style={{ transition: `opacity 0.5s ease ${0.4 + i * 0.03}s` }}
         >
           {ZODIAC_GLYPHS[sign]}
         </text>
@@ -206,10 +222,11 @@ export default function ZodiacWheel({ chart }: ZodiacWheelProps) {
     }
   }
 
-  const planetElements = sorted.map((p) => {
+  const planetElements = sorted.map((p, i) => {
     const [px, py] = polarToXY(CX, CY, PLANET_R, p.chartAngle);
     const house = findHouseForPlanet(p.longitude, houseCusps);
     const tooltipText = `${PLANET_NAMES_PT[p.planet]} a ${p.degree}°${String(p.minute).padStart(2, '0')}' ${SIGN_NAMES_PT[p.sign]}, Casa ${house}${p.isRetrograde ? ' (R)' : ''}`;
+    const isHovered = hoveredPlanet === p.planet;
 
     // Draw tick from planet to outer ring
     const [tx, ty] = polarToXY(CX, CY, HOUSE_OUTER_R - 2, eclipticToAngle(p.longitude, asc));
@@ -222,7 +239,17 @@ export default function ZodiacWheel({ chart }: ZodiacWheelProps) {
           stroke="rgba(232,228,223,0.5)"
           strokeWidth="0.5"
         />
-        {/* Planet glyph */}
+        {/* Hover glow ring */}
+        <circle
+          cx={px} cy={py}
+          r={isHovered ? 12 : 0}
+          fill="none"
+          stroke="rgba(74,93,138,0.2)"
+          strokeWidth="1.5"
+          style={{ transition: 'r 0.3s ease, opacity 0.3s ease' }}
+          opacity={isHovered ? 1 : 0}
+        />
+        {/* Planet glyph with staggered fade-in */}
         <text
           x={px} y={py}
           textAnchor="middle"
@@ -231,8 +258,18 @@ export default function ZodiacWheel({ chart }: ZodiacWheelProps) {
           fontSize="14"
           fontWeight="bold"
           className="cursor-pointer select-none"
-          onMouseEnter={() => setTooltip({ x: px, y: py - 18, text: tooltipText })}
-          onMouseLeave={() => setTooltip(null)}
+          opacity={isVisible ? 1 : 0}
+          style={{
+            transition: `opacity 0.4s ease ${0.8 + i * 0.1}s, transform 0.3s ease`,
+          }}
+          onMouseEnter={() => {
+            setTooltip({ x: px, y: py - 18, text: tooltipText });
+            setHoveredPlanet(p.planet);
+          }}
+          onMouseLeave={() => {
+            setTooltip(null);
+            setHoveredPlanet(null);
+          }}
         >
           {PLANET_GLYPHS[p.planet]}
           <title>{tooltipText}</title>
@@ -243,6 +280,8 @@ export default function ZodiacWheel({ chart }: ZodiacWheelProps) {
             fill="#D94F4F"
             fontSize="7"
             className="select-none"
+            opacity={isVisible ? 1 : 0}
+            style={{ transition: `opacity 0.4s ease ${0.8 + i * 0.1}s` }}
           >
             R
           </text>
@@ -251,7 +290,7 @@ export default function ZodiacWheel({ chart }: ZodiacWheelProps) {
     );
   });
 
-  // ── Aspect lines ──
+  // ── Aspect lines with draw-in animation ──
   const aspectLines = aspects.map((asp: Aspect, i: number) => {
     const pA = sorted.find((p) => p.planet === asp.planetA);
     const pB = sorted.find((p) => p.planet === asp.planetB);
@@ -260,6 +299,7 @@ export default function ZodiacWheel({ chart }: ZodiacWheelProps) {
     const [x1, y1] = polarToXY(CX, CY, ASPECT_R, pA.chartAngle);
     const [x2, y2] = polarToXY(CX, CY, ASPECT_R, pB.chartAngle);
     const color = ASPECT_COLORS[asp.aspectType] || 'rgba(122,127,142,0.2)';
+    const len = lineLength(x1, y1, x2, y2);
 
     return (
       <line
@@ -267,6 +307,9 @@ export default function ZodiacWheel({ chart }: ZodiacWheelProps) {
         x1={x1} y1={y1} x2={x2} y2={y2}
         stroke={color}
         strokeWidth="0.8"
+        strokeDasharray={len}
+        strokeDashoffset={isVisible ? 0 : len}
+        style={{ transition: `stroke-dashoffset 1s ease ${1.2 + i * 0.04}s` }}
       >
         <title>
           {PLANET_NAMES_PT[asp.planetA]} {asp.aspectType} {PLANET_NAMES_PT[asp.planetB]} (orbe {asp.orb.toFixed(1)}°)
@@ -282,14 +325,44 @@ export default function ZodiacWheel({ chart }: ZodiacWheelProps) {
   const [ascX1, ascY1] = polarToXY(CX, CY, HOUSE_INNER_R, ascAngle);
   const [ascX2, ascY2] = polarToXY(CX, CY, OUTER_R, ascAngle);
   const [ascLabelX, ascLabelY] = polarToXY(CX, CY, OUTER_R + 12, ascAngle);
+  const ascLen = lineLength(ascX1, ascY1, ascX2, ascY2);
 
   const [mcX1, mcY1] = polarToXY(CX, CY, HOUSE_INNER_R, mcAngle);
   const [mcX2, mcY2] = polarToXY(CX, CY, OUTER_R, mcAngle);
   const [mcLabelX, mcLabelY] = polarToXY(CX, CY, OUTER_R + 12, mcAngle);
+  const mcLen = lineLength(mcX1, mcY1, mcX2, mcY2);
 
   return (
     <div className="relative w-full max-w-lg mx-auto">
-      <svg viewBox="0 0 500 500" className="w-full h-auto">
+      <svg
+        ref={svgRef}
+        viewBox="0 0 500 500"
+        className="w-full h-auto"
+        style={{
+          opacity: isVisible ? 1 : 0,
+          transform: isVisible ? 'scale(1) rotate(0deg)' : 'scale(0.8) rotate(-10deg)',
+          transition: 'opacity 0.8s ease, transform 1s cubic-bezier(0.4, 0, 0.2, 1)',
+        }}
+      >
+        {/* Subtle rotating background dotted circle */}
+        <circle
+          cx={CX} cy={CY}
+          r={OUTER_R - 5}
+          fill="none"
+          stroke="rgba(74,93,138,0.03)"
+          strokeWidth="0.5"
+          strokeDasharray="2 8"
+        >
+          <animateTransform
+            attributeName="transform"
+            type="rotate"
+            from={`0 ${CX} ${CY}`}
+            to={`360 ${CX} ${CY}`}
+            dur="120s"
+            repeatCount="indefinite"
+          />
+        </circle>
+
         {/* Background circle */}
         <circle cx={CX} cy={CY} r={OUTER_R} fill="#FAFAF9" stroke="rgba(232,228,223,0.8)" strokeWidth="1" />
         <circle cx={CX} cy={CY} r={HOUSE_OUTER_R} fill="none" stroke="rgba(232,228,223,0.7)" strokeWidth="0.5" />
@@ -301,28 +374,60 @@ export default function ZodiacWheel({ chart }: ZodiacWheelProps) {
         {/* Houses */}
         {houseSegments}
 
-        {/* Aspect lines */}
+        {/* Aspect lines (draw-in animation) */}
         {aspectLines}
 
-        {/* Planets */}
+        {/* Planets (staggered fade-in) */}
         {planetElements}
 
-        {/* Ascendant line */}
-        <line x1={ascX1} y1={ascY1} x2={ascX2} y2={ascY2} stroke="#C98B3F" strokeWidth="2" />
+        {/* Ascendant line with shimmer glow */}
+        <line
+          x1={ascX1} y1={ascY1} x2={ascX2} y2={ascY2}
+          stroke="#C98B3F"
+          strokeWidth="2"
+          strokeDasharray={ascLen}
+          strokeDashoffset={isVisible ? 0 : ascLen}
+          style={{ transition: `stroke-dashoffset 0.8s ease 0.6s` }}
+        >
+          <animate
+            attributeName="stroke-opacity"
+            values="0.8;1;0.8"
+            dur="3s"
+            repeatCount="indefinite"
+          />
+        </line>
         <text
           x={ascLabelX} y={ascLabelY}
           textAnchor="middle" dominantBaseline="central"
           fill="#C98B3F" fontSize="11" fontWeight="bold"
+          opacity={isVisible ? 1 : 0}
+          style={{ transition: 'opacity 0.5s ease 1s' }}
         >
           AC
         </text>
 
-        {/* MC line */}
-        <line x1={mcX1} y1={mcY1} x2={mcX2} y2={mcY2} stroke="#C98B3F" strokeWidth="1.5" />
+        {/* MC line with shimmer glow */}
+        <line
+          x1={mcX1} y1={mcY1} x2={mcX2} y2={mcY2}
+          stroke="#C98B3F"
+          strokeWidth="1.5"
+          strokeDasharray={mcLen}
+          strokeDashoffset={isVisible ? 0 : mcLen}
+          style={{ transition: `stroke-dashoffset 0.8s ease 0.7s` }}
+        >
+          <animate
+            attributeName="stroke-opacity"
+            values="0.7;1;0.7"
+            dur="4s"
+            repeatCount="indefinite"
+          />
+        </line>
         <text
           x={mcLabelX} y={mcLabelY}
           textAnchor="middle" dominantBaseline="central"
           fill="#C98B3F" fontSize="11" fontWeight="bold"
+          opacity={isVisible ? 1 : 0}
+          style={{ transition: 'opacity 0.5s ease 1.1s' }}
         >
           MC
         </text>
@@ -336,6 +441,7 @@ export default function ZodiacWheel({ chart }: ZodiacWheelProps) {
             left: `${(tooltip.x / 500) * 100}%`,
             top: `${(tooltip.y / 500) * 100}%`,
             transform: 'translate(-50%, -100%)',
+            animation: 'fadeIn 0.2s ease-out',
           }}
         >
           {tooltip.text}

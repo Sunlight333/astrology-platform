@@ -31,6 +31,14 @@ const ASPECT_NAMES_PT: Record<string, string> = {
   semisextile: 'Semisextil', semisquare: 'Semiquadratura', sesquiquadrate: 'Sesquiquadratura',
 };
 
+/* ── Animation config ── */
+const springTransition = { type: 'spring' as const, damping: 25, stiffness: 120 };
+
+const sectionInViewProps = {
+  once: true,
+  amount: 0.3 as const,
+};
+
 function findHouse(longitude: number, houseCusps: { house: number; longitude: number }[]): number {
   const sorted = [...houseCusps].sort((a, b) => a.house - b.house);
   for (let i = 0; i < sorted.length; i++) {
@@ -52,11 +60,13 @@ function PlanetSection({
   houseCusps,
   aspects,
   defaultOpen,
+  index = 0,
 }: {
   position: PlanetaryPosition;
   houseCusps: { house: number; longitude: number }[];
   aspects: Aspect[];
   defaultOpen?: boolean;
+  index?: number;
 }) {
   const [open, setOpen] = useState(defaultOpen ?? false);
   const house = findHouse(position.longitude, houseCusps);
@@ -65,15 +75,27 @@ function PlanetSection({
   );
 
   return (
-    <div className="card overflow-hidden">
+    <motion.div
+      className="card overflow-hidden"
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={sectionInViewProps}
+      transition={{ delay: index * 0.08, duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+    >
       <button
         className="w-full -m-6 p-6 flex items-center justify-between hover:bg-muted/30 transition-colors duration-200"
         onClick={() => setOpen(!open)}
       >
         <div className="flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-primary-50 flex items-center justify-center flex-shrink-0">
+          <motion.div
+            className="w-11 h-11 rounded-xl bg-primary-50 flex items-center justify-center flex-shrink-0 transition-all duration-300"
+            whileHover={{
+              scale: 1.1,
+              boxShadow: '0 4px 20px rgba(74, 93, 138, 0.15), 0 0 40px rgba(74, 93, 138, 0.05)',
+            }}
+          >
             <span className="text-primary text-xl">{PLANET_GLYPHS[position.planet]}</span>
-          </div>
+          </motion.div>
           <div className="text-left">
             <h3 className="text-foreground font-medium text-sm">
               {PLANET_NAMES_PT[position.planet]} em {SIGN_NAMES_PT[position.sign]}
@@ -84,10 +106,12 @@ function PlanetSection({
             </p>
           </div>
         </div>
-        <ChevronDown
-          size={18}
-          className={`text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
-        />
+        <motion.div
+          animate={{ rotate: open ? 180 : 0 }}
+          transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+        >
+          <ChevronDown size={18} className="text-muted-foreground" />
+        </motion.div>
       </button>
 
       <AnimatePresence>
@@ -96,16 +120,26 @@ function PlanetSection({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
             className="overflow-hidden"
           >
             <div className="pt-6 mt-6 border-t border-border/40">
-              <p className="text-muted-foreground text-sm italic leading-relaxed">
+              <motion.p
+                className="text-muted-foreground text-sm italic leading-relaxed"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1, duration: 0.3 }}
+              >
                 Interpretacao em breve.
-              </p>
+              </motion.p>
 
               {planetAspects.length > 0 && (
-                <div className="mt-5">
+                <motion.div
+                  className="mt-5"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2, duration: 0.4 }}
+                >
                   <h4 className="section-overline mb-3">
                     Aspectos
                   </h4>
@@ -113,20 +147,26 @@ function PlanetSection({
                     {planetAspects.map((asp, i) => {
                       const other = asp.planetA === position.planet ? asp.planetB : asp.planetA;
                       return (
-                        <p key={i} className="text-muted-foreground text-xs">
+                        <motion.p
+                          key={i}
+                          className="text-muted-foreground text-xs"
+                          initial={{ opacity: 0, x: -8 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.25 + i * 0.05, duration: 0.3 }}
+                        >
                           {ASPECT_NAMES_PT[asp.aspectType] || asp.aspectType} com{' '}
                           {PLANET_NAMES_PT[other]} (orbe {asp.orb.toFixed(1)}°)
-                        </p>
+                        </motion.p>
                       );
                     })}
                   </div>
-                </div>
+                </motion.div>
               )}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 }
 
@@ -157,7 +197,10 @@ export default function ChartPage() {
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center bg-background">
-        <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <div className="relative w-12 h-12">
+          <div className="absolute inset-0 w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <div className="absolute inset-1 w-10 h-10 border-2 border-primary-light/40 border-b-transparent rounded-full" style={{ animation: 'spin 1.5s linear infinite reverse' }} />
+        </div>
       </div>
     );
   }
@@ -165,10 +208,15 @@ export default function ChartPage() {
   if (error || !chart) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center bg-background px-6">
-        <div className="card-elevated p-10 text-center max-w-md">
+        <motion.div
+          className="card-elevated p-10 text-center max-w-md"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={springTransition}
+        >
           <p className="text-destructive mb-6">{error || 'Mapa nao encontrado.'}</p>
           <Link to="/dashboard" className="btn-secondary">Voltar ao Painel</Link>
-        </div>
+        </motion.div>
       </div>
     );
   }
@@ -182,106 +230,166 @@ export default function ChartPage() {
   const otherPlanets = chart.planetaryPositions.filter((p) => !bigThree.includes(p.planet));
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-16">
+    <div className="max-w-4xl mx-auto px-6 py-16 relative overflow-hidden">
+      {/* Subtle orbit ring decoration behind wheel */}
+      <div className="absolute inset-0 flex items-center justify-start pointer-events-none" style={{ top: '-10%' }}>
+        <div
+          className="absolute rounded-full border animate-spin-slower"
+          style={{ width: 500, height: 500, left: '50%', transform: 'translateX(-50%)', borderColor: 'rgba(74,93,138,0.03)', animationDirection: 'reverse' }}
+        />
+      </div>
+
       {/* Wheel */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6, ease: 'easeOut' }}
-        className="card-elevated p-6 mb-10"
+        initial={{ opacity: 0, scale: 0.9, rotate: -5 }}
+        animate={{ opacity: 1, scale: 1, rotate: 0 }}
+        transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+        className="card-glass p-6 mb-10 shadow-celestial relative z-10"
       >
         <ZodiacWheel chart={chart} />
       </motion.div>
 
       {/* Sun, Moon, Ascendant summary */}
       <motion.div
-        className="card-elevated p-8 mb-10"
-        initial={{ opacity: 0, y: 16 }}
+        className="card-elevated p-8 mb-10 relative z-10"
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3, duration: 0.5 }}
+        transition={{ delay: 0.4, ...springTransition }}
       >
-        <h2 className="font-display text-display-md text-foreground mb-6">
+        <motion.h2
+          className="font-display text-display-md text-foreground mb-6"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.4 }}
+        >
           Seu Sol, Lua e Ascendente
-        </h2>
+        </motion.h2>
         <div className="grid sm:grid-cols-3 gap-6">
           {sun && (
-            <div className="text-center">
-              <div className="w-14 h-14 mx-auto rounded-2xl bg-primary-50 flex items-center justify-center mb-3">
+            <motion.div
+              className="text-center"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.55, ...springTransition }}
+            >
+              <motion.div
+                className="w-14 h-14 mx-auto rounded-2xl bg-primary-50 flex items-center justify-center mb-3 transition-all duration-300"
+                whileHover={{ scale: 1.1, boxShadow: '0 4px 20px rgba(74, 93, 138, 0.15), 0 0 40px rgba(74, 93, 138, 0.05)' }}
+              >
                 <span className="text-primary text-2xl">{PLANET_GLYPHS.Sun}</span>
-              </div>
+              </motion.div>
               <p className="text-foreground font-medium mt-1">Sol em {SIGN_NAMES_PT[sun.sign]}</p>
               <p className="text-muted-foreground text-xs mt-1">
                 {sun.degree}°{String(sun.minute).padStart(2, '0')}' - Casa {findHouse(sun.longitude, chart.houseCusps)}
               </p>
-            </div>
+            </motion.div>
           )}
           {moon && (
-            <div className="text-center">
-              <div className="w-14 h-14 mx-auto rounded-2xl bg-primary-50 flex items-center justify-center mb-3">
+            <motion.div
+              className="text-center"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.65, ...springTransition }}
+            >
+              <motion.div
+                className="w-14 h-14 mx-auto rounded-2xl bg-primary-50 flex items-center justify-center mb-3 transition-all duration-300"
+                whileHover={{ scale: 1.1, boxShadow: '0 4px 20px rgba(74, 93, 138, 0.15), 0 0 40px rgba(74, 93, 138, 0.05)' }}
+              >
                 <span className="text-primary text-2xl">{PLANET_GLYPHS.Moon}</span>
-              </div>
+              </motion.div>
               <p className="text-foreground font-medium mt-1">Lua em {SIGN_NAMES_PT[moon.sign]}</p>
               <p className="text-muted-foreground text-xs mt-1">
                 {moon.degree}°{String(moon.minute).padStart(2, '0')}' - Casa {findHouse(moon.longitude, chart.houseCusps)}
               </p>
-            </div>
+            </motion.div>
           )}
           {ascSign && (
-            <div className="text-center">
-              <div className="w-14 h-14 mx-auto rounded-2xl bg-gold-50 flex items-center justify-center mb-3">
+            <motion.div
+              className="text-center"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.75, ...springTransition }}
+            >
+              <motion.div
+                className="w-14 h-14 mx-auto rounded-2xl bg-gold-50 flex items-center justify-center mb-3 transition-all duration-300"
+                whileHover={{ scale: 1.1, boxShadow: '0 0 20px rgba(201, 139, 63, 0.15)' }}
+              >
                 <span className="text-gold text-lg font-display font-medium">AC</span>
-              </div>
+              </motion.div>
               <p className="text-foreground font-medium mt-1">Ascendente em {SIGN_NAMES_PT[ascSign.sign]}</p>
               <p className="text-muted-foreground text-xs mt-1">
                 {ascSign.degree}°
               </p>
-            </div>
+            </motion.div>
           )}
         </div>
       </motion.div>
 
       {/* Planet details - Sun & Moon always visible */}
-      <div className="space-y-4 mb-8">
+      <div className="space-y-4 mb-8 relative z-10">
         {chart.planetaryPositions
           .filter((p) => bigThree.includes(p.planet))
-          .map((p) => (
+          .map((p, i) => (
             <PlanetSection
               key={p.planet}
               position={p}
               houseCusps={chart.houseCusps}
               aspects={chart.aspects}
               defaultOpen
+              index={i}
             />
           ))}
       </div>
 
       {/* Rest of planets - blurred if not paid */}
-      <div className="relative">
+      <div className="relative z-10">
         {!isPaid && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm rounded-2xl">
-            <div className="card-elevated p-8 text-center max-w-sm">
-              <div className="w-16 h-16 mx-auto rounded-2xl bg-gold-50 flex items-center justify-center mb-4">
+          <motion.div
+            className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-2xl"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.6 }}
+          >
+            {/* Animated blur background */}
+            <motion.div
+              className="absolute inset-0 bg-background/60 backdrop-blur-sm rounded-2xl"
+              animate={{ opacity: [0.55, 0.65, 0.55] }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <div className="card-elevated p-8 text-center max-w-sm relative z-10">
+              <motion.div
+                className="w-16 h-16 mx-auto rounded-2xl bg-gold-50 flex items-center justify-center mb-4"
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+              >
                 <Lock size={24} className="text-gold" />
-              </div>
+              </motion.div>
               <p className="font-display text-display-md text-foreground mb-2">Conteudo Completo</p>
               <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
                 Desbloqueie a interpretacao completa de todos os planetas, casas e aspectos.
               </p>
-              <Link to="/pricing" className="btn-gold w-full">
-                Ver Precos
+              <Link to="/pricing" className="btn-gold w-full group relative overflow-hidden">
+                <span
+                  className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"
+                  style={{
+                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)',
+                  }}
+                />
+                <span className="relative z-10">Ver Precos</span>
               </Link>
             </div>
-          </div>
+          </motion.div>
         )}
 
         <div className={!isPaid ? 'blur-sm pointer-events-none select-none' : ''}>
           <div className="space-y-4">
-            {otherPlanets.map((p) => (
+            {otherPlanets.map((p, i) => (
               <PlanetSection
                 key={p.planet}
                 position={p}
                 houseCusps={chart.houseCusps}
                 aspects={chart.aspects}
+                index={i}
               />
             ))}
           </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { NatalChart, PlanetaryPosition, TransitPosition, TransitAspect } from '@star/shared';
 import type { Planet, ZodiacSign, AspectType } from '@star/shared';
 
@@ -89,6 +89,10 @@ function describeArc(
   ].join(' ');
 }
 
+function lineLength(x1: number, y1: number, x2: number, y2: number): number {
+  return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+}
+
 // ── Component ──
 
 interface TransitWheelProps {
@@ -99,6 +103,13 @@ interface TransitWheelProps {
 
 export default function TransitWheel({ chart, transitPositions, transitAspects }: TransitWheelProps) {
   const [tooltip, setTooltip] = useState<{ x: number; y: number; text: string } | null>(null);
+  const [hoveredPlanet, setHoveredPlanet] = useState<string | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsVisible(true), 50);
+    return () => clearTimeout(timer);
+  }, []);
 
   const { planetaryPositions, houseCusps, angles } = chart;
   const asc = angles.ascendant;
@@ -125,6 +136,8 @@ export default function TransitWheel({ chart, transitPositions, transitAspects }
           x={gx} y={gy}
           textAnchor="middle" dominantBaseline="central"
           fill="#7A7F8E" fontSize="12" className="select-none"
+          opacity={isVisible ? 1 : 0}
+          style={{ transition: `opacity 0.5s ease ${0.4 + i * 0.03}s` }}
         >
           {ZODIAC_GLYPHS[sign]}
         </text>
@@ -169,25 +182,51 @@ export default function TransitWheel({ chart, transitPositions, transitAspects }
     }
   }
 
-  const natalPlanetElements = sortedNatal.map((p) => {
+  const natalPlanetElements = sortedNatal.map((p, i) => {
     const [px, py] = polarToXY(CX, CY, NATAL_PLANET_R, p.chartAngle);
     const tooltipText = `${PLANET_NAMES_PT[p.planet]} natal: ${p.degree}\u00b0${String(p.minute).padStart(2, '0')}' ${SIGN_NAMES_PT[p.sign]}${p.isRetrograde ? ' (R)' : ''}`;
+    const isHovered = hoveredPlanet === `natal-${p.planet}`;
 
     return (
       <g key={`natal-${p.planet}`}>
+        {/* Hover glow ring */}
+        <circle
+          cx={px} cy={py}
+          r={isHovered ? 10 : 0}
+          fill="none"
+          stroke="rgba(122,127,142,0.25)"
+          strokeWidth="1"
+          style={{ transition: 'r 0.3s ease, opacity 0.3s ease' }}
+          opacity={isHovered ? 1 : 0}
+        />
         <text
           x={px} y={py}
           textAnchor="middle" dominantBaseline="central"
           fill="#7A7F8E" fontSize="12" fontWeight="bold"
           className="cursor-pointer select-none"
-          onMouseEnter={() => setTooltip({ x: px, y: py - 16, text: tooltipText })}
-          onMouseLeave={() => setTooltip(null)}
+          opacity={isVisible ? 1 : 0}
+          style={{ transition: `opacity 0.4s ease ${0.8 + i * 0.1}s` }}
+          onMouseEnter={() => {
+            setTooltip({ x: px, y: py - 16, text: tooltipText });
+            setHoveredPlanet(`natal-${p.planet}`);
+          }}
+          onMouseLeave={() => {
+            setTooltip(null);
+            setHoveredPlanet(null);
+          }}
         >
           {PLANET_GLYPHS[p.planet]}
           <title>{tooltipText}</title>
         </text>
         {p.isRetrograde && (
-          <text x={px + 7} y={py - 7} fill="#D94F4F" fontSize="6" className="select-none">R</text>
+          <text
+            x={px + 7} y={py - 7}
+            fill="#D94F4F" fontSize="6" className="select-none"
+            opacity={isVisible ? 1 : 0}
+            style={{ transition: `opacity 0.4s ease ${0.8 + i * 0.1}s` }}
+          >
+            R
+          </text>
         )}
       </g>
     );
@@ -213,32 +252,56 @@ export default function TransitWheel({ chart, transitPositions, transitAspects }
     }
   }
 
-  const transitPlanetElements = sortedTransit.map((tp) => {
+  const transitPlanetElements = sortedTransit.map((tp, i) => {
     const [px, py] = polarToXY(CX, CY, TRANSIT_PLANET_R, tp.chartAngle);
     const tooltipText = `${PLANET_NAMES_PT[tp.planet]} transito: ${tp.degree}\u00b0 ${SIGN_NAMES_PT[tp.sign]}${tp.isRetrograde ? ' (R)' : ''}`;
+    const isHovered = hoveredPlanet === `transit-${tp.planet}`;
 
     return (
       <g key={`transit-${tp.planet}`}>
-        <circle cx={px} cy={py} r={8} fill="rgba(201,139,63,0.08)" stroke="rgba(201,139,63,0.25)" strokeWidth="0.5" />
+        {/* Hover glow ring */}
+        <circle
+          cx={px} cy={py}
+          r={isHovered ? 12 : 8}
+          fill="rgba(201,139,63,0.08)"
+          stroke={isHovered ? 'rgba(201,139,63,0.45)' : 'rgba(201,139,63,0.25)'}
+          strokeWidth={isHovered ? 1 : 0.5}
+          style={{ transition: 'r 0.3s ease, stroke 0.3s ease, stroke-width 0.3s ease' }}
+        />
         <text
           x={px} y={py}
           textAnchor="middle" dominantBaseline="central"
           fill="#4A5D8A" fontSize="12" fontWeight="bold"
           className="cursor-pointer select-none"
-          onMouseEnter={() => setTooltip({ x: px, y: py - 16, text: tooltipText })}
-          onMouseLeave={() => setTooltip(null)}
+          opacity={isVisible ? 1 : 0}
+          style={{ transition: `opacity 0.4s ease ${1.2 + i * 0.1}s` }}
+          onMouseEnter={() => {
+            setTooltip({ x: px, y: py - 16, text: tooltipText });
+            setHoveredPlanet(`transit-${tp.planet}`);
+          }}
+          onMouseLeave={() => {
+            setTooltip(null);
+            setHoveredPlanet(null);
+          }}
         >
           {PLANET_GLYPHS[tp.planet]}
           <title>{tooltipText}</title>
         </text>
         {tp.isRetrograde && (
-          <text x={px + 7} y={py - 7} fill="#D94F4F" fontSize="6" className="select-none">R</text>
+          <text
+            x={px + 7} y={py - 7}
+            fill="#D94F4F" fontSize="6" className="select-none"
+            opacity={isVisible ? 1 : 0}
+            style={{ transition: `opacity 0.4s ease ${1.2 + i * 0.1}s` }}
+          >
+            R
+          </text>
         )}
       </g>
     );
   });
 
-  // ── Aspect lines from transit to natal ──
+  // ── Aspect lines from transit to natal with draw-in animation ──
   const aspectLines = transitAspects.map((asp, i) => {
     const transitP = sortedTransit.find((p) => p.planet === asp.transitPlanet);
     const natalP = sortedNatal.find((p) => p.planet === asp.natalPlanet);
@@ -248,6 +311,7 @@ export default function TransitWheel({ chart, transitPositions, transitAspects }
     const [x2, y2] = polarToXY(CX, CY, ASPECT_INNER_R, natalP.chartAngle);
     const color = ASPECT_COLORS[asp.aspectType] || 'rgba(122,127,142,0.2)';
     const opacity = Math.max(0.2, 1 - asp.currentOrb / 10);
+    const len = lineLength(x1, y1, x2, y2);
 
     return (
       <line
@@ -256,7 +320,13 @@ export default function TransitWheel({ chart, transitPositions, transitAspects }
         stroke={color}
         strokeWidth={asp.currentOrb < 1 ? 1.5 : 0.8}
         opacity={opacity}
-        strokeDasharray={asp.isApplying ? undefined : '4 2'}
+        strokeDasharray={asp.isApplying ? `${len}` : '4 2'}
+        strokeDashoffset={isVisible ? 0 : (asp.isApplying ? len : 0)}
+        style={{
+          transition: asp.isApplying
+            ? `stroke-dashoffset 1s ease ${1.5 + i * 0.06}s`
+            : undefined,
+        }}
       >
         <title>
           {PLANET_NAMES_PT[asp.transitPlanet]} {asp.aspectType} {PLANET_NAMES_PT[asp.natalPlanet]} (orbe {asp.currentOrb.toFixed(1)}\u00b0, {asp.isApplying ? 'aplicando' : 'separando'})
@@ -271,13 +341,58 @@ export default function TransitWheel({ chart, transitPositions, transitAspects }
   const [ascX1, ascY1] = polarToXY(CX, CY, NATAL_INNER_R, ascAngle);
   const [ascX2, ascY2] = polarToXY(CX, CY, OUTER_R, ascAngle);
   const [ascLabelX, ascLabelY] = polarToXY(CX, CY, OUTER_R + 10, ascAngle);
+  const ascLen = lineLength(ascX1, ascY1, ascX2, ascY2);
   const [mcX1, mcY1] = polarToXY(CX, CY, NATAL_INNER_R, mcAngle);
   const [mcX2, mcY2] = polarToXY(CX, CY, OUTER_R, mcAngle);
   const [mcLabelX, mcLabelY] = polarToXY(CX, CY, OUTER_R + 10, mcAngle);
+  const mcLen = lineLength(mcX1, mcY1, mcX2, mcY2);
 
   return (
     <div className="relative w-full max-w-lg mx-auto">
-      <svg viewBox="0 0 500 500" className="w-full h-auto">
+      <svg
+        viewBox="0 0 500 500"
+        className="w-full h-auto"
+        style={{
+          opacity: isVisible ? 1 : 0,
+          transform: isVisible ? 'scale(1) rotate(0deg)' : 'scale(0.8) rotate(-10deg)',
+          transition: 'opacity 0.8s ease, transform 1s cubic-bezier(0.4, 0, 0.2, 1)',
+        }}
+      >
+        {/* Subtle rotating background dotted circle */}
+        <circle
+          cx={CX} cy={CY}
+          r={OUTER_R - 3}
+          fill="none"
+          stroke="rgba(74,93,138,0.03)"
+          strokeWidth="0.5"
+          strokeDasharray="2 8"
+        >
+          <animateTransform
+            attributeName="transform"
+            type="rotate"
+            from={`0 ${CX} ${CY}`}
+            to={`360 ${CX} ${CY}`}
+            dur="120s"
+            repeatCount="indefinite"
+          />
+        </circle>
+
+        {/* Pulsing glow on outer transit ring */}
+        <circle
+          cx={CX} cy={CY}
+          r={SIGN_INNER_R}
+          fill="none"
+          stroke="rgba(201,139,63,0.08)"
+          strokeWidth="1"
+        >
+          <animate
+            attributeName="stroke-opacity"
+            values="0.04;0.12;0.04"
+            dur="4s"
+            repeatCount="indefinite"
+          />
+        </circle>
+
         {/* Background */}
         <circle cx={CX} cy={CY} r={OUTER_R} fill="#FAFAF9" stroke="rgba(232,228,223,0.8)" strokeWidth="1" />
         <circle cx={CX} cy={CY} r={SIGN_INNER_R} fill="none" stroke="rgba(232,228,223,0.7)" strokeWidth="0.5" />
@@ -290,26 +405,72 @@ export default function TransitWheel({ chart, transitPositions, transitAspects }
         {/* House cusps */}
         {houseLines}
 
-        {/* Aspect lines */}
+        {/* Aspect lines (draw-in) */}
         {aspectLines}
 
-        {/* Natal planets (inner) */}
+        {/* Natal planets (inner) - staggered fade-in */}
         {natalPlanetElements}
 
-        {/* Transit planets (outer) */}
+        {/* Transit planets (outer) - fade in after natal */}
         {transitPlanetElements}
 
         {/* Ascendant */}
-        <line x1={ascX1} y1={ascY1} x2={ascX2} y2={ascY2} stroke="#C98B3F" strokeWidth="1.5" />
-        <text x={ascLabelX} y={ascLabelY} textAnchor="middle" dominantBaseline="central" fill="#C98B3F" fontSize="10" fontWeight="bold">AC</text>
+        <line
+          x1={ascX1} y1={ascY1} x2={ascX2} y2={ascY2}
+          stroke="#C98B3F" strokeWidth="1.5"
+          strokeDasharray={ascLen}
+          strokeDashoffset={isVisible ? 0 : ascLen}
+          style={{ transition: 'stroke-dashoffset 0.8s ease 0.6s' }}
+        >
+          <animate attributeName="stroke-opacity" values="0.8;1;0.8" dur="3s" repeatCount="indefinite" />
+        </line>
+        <text
+          x={ascLabelX} y={ascLabelY}
+          textAnchor="middle" dominantBaseline="central"
+          fill="#C98B3F" fontSize="10" fontWeight="bold"
+          opacity={isVisible ? 1 : 0}
+          style={{ transition: 'opacity 0.5s ease 1s' }}
+        >
+          AC
+        </text>
 
         {/* MC */}
-        <line x1={mcX1} y1={mcY1} x2={mcX2} y2={mcY2} stroke="#C98B3F" strokeWidth="1" />
-        <text x={mcLabelX} y={mcLabelY} textAnchor="middle" dominantBaseline="central" fill="#C98B3F" fontSize="10" fontWeight="bold">MC</text>
+        <line
+          x1={mcX1} y1={mcY1} x2={mcX2} y2={mcY2}
+          stroke="#C98B3F" strokeWidth="1"
+          strokeDasharray={mcLen}
+          strokeDashoffset={isVisible ? 0 : mcLen}
+          style={{ transition: 'stroke-dashoffset 0.8s ease 0.7s' }}
+        >
+          <animate attributeName="stroke-opacity" values="0.7;1;0.7" dur="4s" repeatCount="indefinite" />
+        </line>
+        <text
+          x={mcLabelX} y={mcLabelY}
+          textAnchor="middle" dominantBaseline="central"
+          fill="#C98B3F" fontSize="10" fontWeight="bold"
+          opacity={isVisible ? 1 : 0}
+          style={{ transition: 'opacity 0.5s ease 1.1s' }}
+        >
+          MC
+        </text>
 
         {/* Legend */}
-        <text x={10} y={488} fill="#7A7F8E" fontSize="8" className="select-none">Interno: Natal</text>
-        <text x={10} y={498} fill="#4A5D8A" fontSize="8" className="select-none">Externo: Transitos</text>
+        <text
+          x={10} y={488}
+          fill="#7A7F8E" fontSize="8" className="select-none"
+          opacity={isVisible ? 1 : 0}
+          style={{ transition: 'opacity 0.5s ease 1.5s' }}
+        >
+          Interno: Natal
+        </text>
+        <text
+          x={10} y={498}
+          fill="#4A5D8A" fontSize="8" className="select-none"
+          opacity={isVisible ? 1 : 0}
+          style={{ transition: 'opacity 0.5s ease 1.6s' }}
+        >
+          Externo: Transitos
+        </text>
       </svg>
 
       {/* Tooltip */}
@@ -320,6 +481,7 @@ export default function TransitWheel({ chart, transitPositions, transitAspects }
             left: `${(tooltip.x / 500) * 100}%`,
             top: `${(tooltip.y / 500) * 100}%`,
             transform: 'translate(-50%, -100%)',
+            animation: 'fadeIn 0.2s ease-out',
           }}
         >
           {tooltip.text}
